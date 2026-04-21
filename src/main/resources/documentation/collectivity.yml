@@ -7,6 +7,8 @@ servers:
   - url: https://localhost:8080/
 
 tags:
+  - name: Admission
+    description: Dépôt et traitement des candidatures d'adhésion
   - name: Collectivités
     description: Création et gestion des collectivités
   - name: Membres
@@ -19,10 +21,12 @@ tags:
     description: Activités organisées par les collectivités ou la fédération
   - name: Présences
     description: Feuilles de présence et assiduité
-  - name: Statistiques
+  - name: Statistiques collectivite
     description: Rapports et indicateurs d'une collectivité
   - name: Fédération
     description: Comptes, activités et rapports au niveau fédération
+  - name: Statistiques federation
+    description: Rapports statistiques mensuels et annuels de la fédération
 
 paths:
   /collectivites:
@@ -180,6 +184,73 @@ paths:
                     message: "Les frais d'adhésion doivent être réglés par mobile money ou virement bancaire (pas en espèces)."
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /collectivites/{collectiviteId}/candidatures:
+    post:
+      tags: [ Admission ]
+      summary: Soumettre une candidature d'adhésion
+      parameters:
+        - $ref: "#/components/parameters/collectiviteId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidatureRequest"
+            example:
+              candidat:
+                prenom: Voahangy
+                nom: Rakoto
+                date_naissance: "1995-03-15"
+                genre: F
+                adresse: "Lot IVN 42, Antananarivo"
+                profession: Agricultrice
+                telephone: "+261341234567"
+                email: voahangy.rakoto@mail.mg
+              parrains:
+                - membre_id: 12
+                  relation: famille
+                - membre_id: 34
+                  relation: collègue
+              paiement:
+                montant: 250000
+                methode: mobile_money
+                reference_transaction: OM-2024-98765
+      responses:
+        "201":
+          description: Candidature soumise avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidatureResponse"
+        "400":
+          description: Données invalides ou règle de parrainage non respectée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurAdmission"
+              examples:
+                parrains_insuffisants:
+                  summary: Moins de 2 parrains fournis
+                  value:
+                    code: PARRAINS_INSUFFISANTS
+                    message: "Au moins 2 membres confirmés doivent parrainer le candidat."
+                regle_parrainage_non_respectee:
+                  summary: Majorité de parrains extérieurs
+                  value:
+                    code: REGLE_PARRAINAGE_NON_RESPECTEE
+                    message: >
+                      Le nombre de parrains issus de la collectivité cible (0) doit être
+                      supérieur ou égal au nombre de parrains extérieurs (2).
+                paiement_insuffisant:
+                  summary: Montant incorrect
+                  value:
+                    code: PAIEMENT_INSUFFISANT
+                    message: "Le montant reçu (50000 Ar) est inférieur au total requis (250000 Ar)."
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
 
   /membres/{membreId}:
     get:
@@ -1522,6 +1593,74 @@ components:
             details:
               type: object
               additionalProperties: true
+
+    CandidatInfo:
+      type: object
+      required: [ prenom, nom, date_naissance, genre, adresse, profession, telephone, email ]
+      properties:
+        prenom: { type: string }
+        nom: { type: string }
+        date_naissance: { type: string, format: date }
+        genre: { type: string, enum: [ M, F ] }
+        adresse: { type: string }
+        profession: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+
+    Parrain:
+      type: object
+      required: [ membre_id, relation ]
+      properties:
+        membre_id: { type: integer }
+        relation:
+          type: string
+          enum: [ famille, amis, collègues, voisins, autre ]
+
+    PaiementAdmission:
+      type: object
+      required: [ montant, methode ]
+      properties:
+        montant: { type: integer }
+        methode:
+          type: string
+          enum: [ espèces, virement_bancaire, mobile_money ]
+        reference_transaction: { type: string }
+
+    CandidatureRequest:
+      type: object
+      required: [ candidat, parrains, paiement ]
+      properties:
+        candidat: { $ref: "#/components/schemas/CandidatInfo" }
+        parrains:
+          type: array
+          minItems: 2
+          items: { $ref: "#/components/schemas/Parrain" }
+        paiement: { $ref: "#/components/schemas/PaiementAdmission" }
+
+    CandidatureResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        collectivite_id: { type: integer }
+        statut: { type: string, enum: [ en_attente, approuvee, rejetee ] }
+        candidat: { $ref: "#/components/schemas/CandidatInfo" }
+        parrains:
+          type: array
+          items: { $ref: "#/components/schemas/Parrain" }
+        verification_parrainage: { $ref: "#/components/schemas/VerificationParrainage" }
+        paiement: { $ref: "#/components/schemas/PaiementAdmission" }
+        date_soumission: { type: string, format: date-time }
+        commentaire: { type: string, nullable: true }
+
+    VerificationParrainage:
+      type: object
+      properties:
+        valide: { type: boolean }
+        parrains_collectivite_cible: { type: integer }
+        parrains_exterieurs: { type: integer }
+        message: { type: string }
+
+
 
   responses:
     NotFound:
