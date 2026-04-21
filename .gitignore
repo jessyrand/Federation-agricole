@@ -31,4 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
-src/resources/documentation/agriculturalFederationAPI.yml
+src/main/resources/documentation/agriculturalFederationAPI.yml
