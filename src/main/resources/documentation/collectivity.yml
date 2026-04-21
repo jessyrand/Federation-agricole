@@ -1718,6 +1718,19 @@ components:
               type: object
               additionalProperties: true
 
+    ErreurAdmission:
+      allOf:
+        - $ref: "#/components/schemas/Erreur"
+        - type: object
+          properties:
+            details:
+              type: object
+              properties:
+                parrains_collectivite_cible: { type: integer }
+                parrains_exterieurs: { type: integer }
+                montant_recu: { type: integer }
+                montant_requis: { type: integer }
+
     CandidatInfo:
       type: object
       required: [ prenom, nom, date_naissance, genre, adresse, profession, telephone, email ]
