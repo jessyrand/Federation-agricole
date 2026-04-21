@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @Configuration
-public class Datasource {
+public class DataSource {
     public Connection getConnection() {
         try {
             String url = System.getenv("DB_URL");
