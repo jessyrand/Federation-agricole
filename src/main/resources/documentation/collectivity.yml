@@ -1834,18 +1834,18 @@ components:
               montant_total_recouvre: { type: integer }
               devise: { type: string, default: MGA }
 
-      AdherentsResponse:
-        type: object
-        properties:
-          periode: { $ref: "#/components/schemas/Periode" }
-          collectivites:
-            type: array
-            items:
-              type: object
-              properties:
-                collectivite_id: { type: integer }
-                nom: { type: string }
-                nouveaux_adherents: { type: integer }
+    AdherentsResponse:
+      type: object
+      properties:
+        periode: { $ref: "#/components/schemas/Periode" }
+        collectivites:
+          type: array
+          items:
+            type: object
+            properties:
+              collectivite_id: { type: integer }
+              nom: { type: string }
+              nouveaux_adherents: { type: integer }
 
   responses:
     NotFound:
