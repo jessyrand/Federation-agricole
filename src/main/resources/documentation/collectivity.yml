@@ -521,6 +521,129 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /federation/statistiques:
+    get:
+      tags: [ Statistiques ]
+      summary: Statistiques globales agrégées de la fédération
+      parameters:
+        - name: date_debut
+          in: query
+          required: true
+          description: Début de la période (format ISO 8601)
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: date_fin
+          in: query
+          required: true
+          description: Fin de la période (format ISO 8601)
+          schema:
+            type: string
+            format: date
+          example: "2024-12-31"
+        - name: collectivite_id
+          in: query
+          description: Filtrer sur une collectivité spécifique (optionnel)
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Statistiques récupérées avec succès
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatistiquesGlobalesResponse"
+        "400":
+          description: Paramètres de date invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erreur"
+
+  /federation/statistiques/assiduite:
+    get:
+      tags: [ Statistiques ]
+      summary: Taux d'assiduité global par collectivité
+      operationId: getStatistiquesAssiduite
+      parameters:
+        - name: date_debut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: date_fin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Taux d'assiduité par collectivité
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssiduiteResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /federation/statistiques/cotisations:
+    get:
+      tags: [ Statistiques ]
+      summary: Pourcentage de membres à jour dans leurs cotisations
+      operationId: getStatistiquesCotisations
+      parameters:
+        - name: date_debut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: date_fin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Taux de cotisations à jour par collectivité
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CotisationsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /federation/statistiques/adherents:
+    get:
+      tags: [ Statistiques ]
+      summary: Nombre de nouveaux adhérents par collectivité
+      operationId: getStatistiquesAdherents
+      parameters:
+        - name: date_debut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: date_fin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Nouveaux adhérents par collectivité
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdherentsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
   /collectivites/{collectiviteId}/activites:
     get:
@@ -600,6 +723,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+    
 
   /collectivites/{collectiviteId}/activites/{activiteId}:
     get:
@@ -1660,7 +1784,68 @@ components:
         parrains_exterieurs: { type: integer }
         message: { type: string }
 
+    StatistiqueCollectivite:
+      type: object
+      properties:
+        collectivite_id: { type: integer }
+        nom: { type: string }
+        taux_assiduite: { type: number, format: float }
+        taux_cotisations_a_jour: { type: number, format: float }
+        nouveaux_adherents: { type: integer }
 
+    StatistiquesGlobalesResponse:
+      type: object
+      properties:
+        periode: { $ref: "#/components/schemas/Periode" }
+        collectivites:
+          type: array
+          items: { $ref: "#/components/schemas/StatistiqueCollectivite" }
+
+    AssiduiteResponse:
+      type: object
+      properties:
+        periode: { $ref: "#/components/schemas/Periode" }
+        collectivites:
+          type: array
+          items:
+            type: object
+            properties:
+              collectivite_id: { type: integer }
+              nom: { type: string }
+              taux_assiduite: { type: number }
+              activites_tenues: { type: integer }
+              presences_moyennes: { type: number }
+
+    CotisationsResponse:
+      type: object
+      properties:
+        periode: { $ref: "#/components/schemas/Periode" }
+        collectivites:
+          type: array
+          items:
+            type: object
+            properties:
+              collectivite_id: { type: integer }
+              nom: { type: string }
+              total_membres: { type: integer }
+              membres_a_jour: { type: integer }
+              taux_cotisations_a_jour: { type: number }
+              montant_total_attendu: { type: integer }
+              montant_total_recouvre: { type: integer }
+              devise: { type: string, default: MGA }
+
+      AdherentsResponse:
+        type: object
+        properties:
+          periode: { $ref: "#/components/schemas/Periode" }
+          collectivites:
+            type: array
+            items:
+              type: object
+              properties:
+                collectivite_id: { type: integer }
+                nom: { type: string }
+                nouveaux_adherents: { type: integer }
 
   responses:
     NotFound:
