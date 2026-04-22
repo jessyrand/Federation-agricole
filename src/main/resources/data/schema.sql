@@ -40,3 +40,20 @@ create table member_referees (
 ALTER TABLE collectivities
     ADD COLUMN number VARCHAR UNIQUE,
     ADD COLUMN name VARCHAR UNIQUE;
+
+CREATE TABLE membership_fee (
+                                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+                                collectivity_id UUID NOT NULL,
+
+                                eligible_from DATE NOT NULL,
+                                frequency VARCHAR NOT NULL,
+                                amount DOUBLE PRECISION NOT NULL,
+                                label VARCHAR,
+                                status VARCHAR NOT NULL DEFAULT 'ACTIVE',
+
+                                CONSTRAINT fk_collectivity_fee
+                                    FOREIGN KEY (collectivity_id)
+                                        REFERENCES collectivities(id)
+                                        ON DELETE CASCADE
+);

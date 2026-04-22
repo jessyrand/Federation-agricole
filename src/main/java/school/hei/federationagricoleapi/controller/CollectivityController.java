@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.DTO.CreateMembershipFeeDTO;
+import school.hei.federationagricoleapi.entity.MembershipFee;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityServices;
+import school.hei.federationagricoleapi.service.MembershipFeeService;
 import school.hei.federationagricoleapi.validator.CollectivityValidator;
 import school.hei.federationagricoleapi.validator.MemberValidator;
 
@@ -21,6 +24,7 @@ public class CollectivityController {
     private final MemberValidator memberValidator;
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
+    private MembershipFeeService membershipFeeService;
 
 
     @PostMapping("/collectivities")
@@ -77,6 +81,24 @@ public class CollectivityController {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> createMembershipFees(
+            @PathVariable String id,
+            @RequestBody List<CreateMembershipFeeDTO> dtos
+    ) {
+        try {
+            List<MembershipFee> fees = membershipFeeService.createFees(id, dtos);
+
+            return ResponseEntity.ok(fees);
+        }
+        catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
