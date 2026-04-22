@@ -10,6 +10,7 @@ import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.MemberRepository;
+import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 public class CollectivityServices {
     private final CollectivityRepository collectivityRepository;
     private final MemberRepository memberRepository;
+    private CollectivityIdentificationValidator collectivityIdentificationValidator;
 
     public List<Collectivity> createColectivity(List<CreateCollectivityDTO> collectivities) {
     List<Collectivity> collectivitiesList = collectivityRepository.save(collectivities);
@@ -29,15 +31,16 @@ public class CollectivityServices {
         }
     }
 
-    return collectivitiesList;
-  }
 
-  public Collectivity identifyCollectivity(CollectivityIdentificationDTO dto)
-      throws NotFoundException, BadRequestException {
+    public Collectivity identifyCollectivity(String id, CollectivityIdentificationDTO dto)
+            throws NotFoundException, BadRequestException {
 
-    if (dto.getId() == null || dto.getNumber() == null || dto.getName() == null) {
-      throw new BadRequestException("Missing required fields");
-    }
+        if (id == null || dto.getNumber() == null || dto.getName() == null) {
+            throw new BadRequestException("Missing required fields");
+        }
+
+        Collectivity collectivity = collectivityRepository.findById(id).orElse(null);
+        collectivityIdentificationValidator.validateIdentification(collectivity);
 
     Collectivity collectivity = collectivityRepository.findById(dto.getId()).orElse(null);
     collectivity.setNumber(dto.getNumber());

@@ -108,6 +108,7 @@ public class CollectivityRepository {
                 for (String id : collectivity.getMembers()) {
                     pstmt.setObject(1, UUID.fromString(id));
                     pstmt.setObject(2, UUID.fromString(idCollectivity));
+
                     pstmt.executeUpdate();
                     memberRepository.findById(id).ifPresent(members::add);
                 }
@@ -121,7 +122,8 @@ public class CollectivityRepository {
     private Collectivity saveCollectivityInfo(ResultSet rs) throws SQLException {
         Collectivity collectivity = new Collectivity();
         collectivity.setId(rs.getString("id"));
-        collectivity.setNumber(rs.getString("number"));
+        int number = rs.getInt("number");
+        collectivity.setNumber(rs.wasNull() ? null : number);
         collectivity.setName(rs.getString("name"));
         collectivity.setLocation(rs.getString("location"));
 
@@ -166,7 +168,7 @@ public class CollectivityRepository {
         }
     }
 
-    public Collectivity updateIdentification(String id, String number, String name) {
+    public Collectivity updateIdentification(String id, Integer number, String name) {
         String sql = """
         update collectivities
         set number = ?, name = ?
@@ -175,9 +177,9 @@ public class CollectivityRepository {
     """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, number);
+            pstmt.setInt(1, number);
             pstmt.setString(2, name);
-            pstmt.setString(3, id);
+            pstmt.setObject(3, java.util.UUID.fromString(id));
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {

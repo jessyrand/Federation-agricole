@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CollectivityIdentificationDTO {
-    private String id;
-    private String number;
+    private Integer number;
     private String name;
 }

@@ -22,6 +22,8 @@ public class MemberService {
 
     public List<Member> createMembers(List<CreateMemberDTO> dtos) {
 
+        boolean hasExistingMembers = memberRepository.existsAnyMember();
+
         List<Member> members = new ArrayList<>();
 
         for (CreateMemberDTO dto : dtos) {
@@ -35,12 +37,21 @@ public class MemberService {
                     .orElseThrow(() -> new NotFoundException("Collectivity not found"));
 
             List<Member> referees = new ArrayList<>();
-            if (dto.getReferees() != null) {
+
+            if (dto.getReferees() != null && !dto.getReferees().isEmpty()) {
                 for (String refereeId : dto.getReferees()) {
                     Member referee = memberRepository.findById(refereeId)
                             .orElseThrow(() -> new NotFoundException("Referee not found"));
                     referees.add(referee);
                 }
+            }
+
+            if (hasExistingMembers && referees.isEmpty()) {
+                throw new IllegalArgumentException("Referee required");
+            }
+
+            if (!hasExistingMembers && !referees.isEmpty()) {
+                throw new IllegalArgumentException("First member cannot have referees");
             }
 
             Member member = new Member();
@@ -50,7 +61,7 @@ public class MemberService {
             member.setGender(dto.getGender());
             member.setAddress(dto.getAddress());
             member.setProfession(dto.getProfession());
-            member.setPhoneNumber(String.valueOf(dto.getPhoneNumber()));
+            member.setPhoneNumber(dto.getPhoneNumber());
             member.setEmail(dto.getEmail());
             member.setOccupation(dto.getOccupation());
             member.setCreatedAt(Instant.now());
