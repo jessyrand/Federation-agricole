@@ -18,6 +18,47 @@ public class MembershipFeeRepository {
 
     private final Connection connection;
 
+    public List<MembershipFee> findByCollectivityId(String collectivityId) {
+
+        String sql = """
+            SELECT id, eligible_from, frequency, amount, label, status
+            FROM membership_fee
+            WHERE collectivity_id = ?
+            ORDER BY eligible_from DESC
+        """;
+
+        List<MembershipFee> fees = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setObject(1, UUID.fromString(collectivityId));
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                while (rs.next()) {
+                    MembershipFee fee = new MembershipFee();
+
+                    fee.setId(rs.getString("id"));
+                    fee.setEligibleFrom(rs.getDate("eligible_from").toLocalDate());
+                    fee.setFrequency(Frequency.valueOf(rs.getString("frequency")));
+
+                    double amount = rs.getDouble("amount");
+                    fee.setAmount(rs.wasNull() ? null : amount);
+
+                    fee.setLabel(rs.getString("label"));
+                    fee.setStatus(ActivityStatus.valueOf(rs.getString("status")));
+
+                    fees.add(fee);
+                }
+            }
+
+            return fees;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<MembershipFee> saveAll(String collectivityId, List<CreateMembershipFeeDTO> dtos) {
         String sql = """
             INSERT INTO membership_fee (

@@ -18,6 +18,14 @@ public class MembershipFeeService {
     private final MembershipFeeRepository repository;
     private final CollectivityRepository collectivityRepository;
 
+    public List<MembershipFee> getFeesByCollectivity(String collectivityId) {
+
+        collectivityRepository.findById(collectivityId)
+                .orElseThrow(() -> new NotFoundException("Collectivity not found"));
+
+        return repository.findByCollectivityId(collectivityId);
+    }
+
     public List<MembershipFee> createFees(String collectivityId, List<CreateMembershipFeeDTO> dtos)
             throws BadRequestException {
 

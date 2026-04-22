@@ -84,6 +84,19 @@ public class CollectivityController {
         }
     }
 
+    @GetMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id) {
+        try {
+            List<MembershipFee> fees = membershipFeeService.getFeesByCollectivity(id);
+            return ResponseEntity.ok(fees);
+        }
+        catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+
     @PostMapping("/collectivities/{id}/membershipFees")
     public ResponseEntity<?> createMembershipFees(
             @PathVariable String id,
