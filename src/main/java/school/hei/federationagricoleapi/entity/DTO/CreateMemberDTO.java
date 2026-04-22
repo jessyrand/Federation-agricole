@@ -1,8 +1,10 @@
-package school.hei.federationagricoleapi.entity;
+package school.hei.federationagricoleapi.entity.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.hei.federationagricoleapi.entity.Gender;
+import school.hei.federationagricoleapi.entity.MemberOccupation;
 
 import java.time.LocalDate;
 
