@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import school.hei.federationagricoleapi.entity.Collectivity;
-import school.hei.federationagricoleapi.entity.CreateMember;
+import school.hei.federationagricoleapi.entity.DTO.CreateMemberDTO;
 import school.hei.federationagricoleapi.entity.Member;
 import school.hei.federationagricoleapi.repository.MemberRepository;
 
@@ -24,13 +24,13 @@ public class MemberService {
         this.collectivityRepository = collectivityRepository;
     }
 
-    public List<Member> createMembers(List<CreateMember> requests) {
+    public List<Member> createMembers(List<CreateMemberDTO> requests) {
 
         List<Member> result = new ArrayList<>();
 
-        for (CreateMember req : requests) {
+        for (CreateMemberDTO req : requests) {
 
-            if (!req.isRegistrationFeePaid() || !req.isMembershipDuesPaid()) {
+            if (!req.getRegistrationFeePaid() || !req.getMembershipDuesPaid()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fees not paid");
             }
 
