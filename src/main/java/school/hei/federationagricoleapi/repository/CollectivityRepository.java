@@ -21,10 +21,10 @@ public class CollectivityRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, collectivity.getLocation());
-            pstmt.setString(2, collectivity.getStructure().getPresident().getId());
-            pstmt.setString(3, collectivity.getStructure().getVicePresident().getId());
-            pstmt.setString(4, collectivity.getStructure().getTreasurer().getId());
-            pstmt.setString(5, collectivity.getStructure().getSecretary().getId());
+            pstmt.setString(2, collectivity.getPresident().getId());
+            pstmt.setString(3, collectivity.getVicePresident().getId());
+            pstmt.setString(4, collectivity.getTreasurer().getId());
+            pstmt.setString(5, collectivity.getSecretary().getId());
             pstmt.executeUpdate();
         }
         catch (SQLException e) {
