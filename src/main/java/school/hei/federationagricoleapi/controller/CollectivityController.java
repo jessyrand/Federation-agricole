@@ -1,24 +1,24 @@
 package school.hei.federationagricoleapi.controller;
 
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityServices;
 import school.hei.federationagricoleapi.validator.CollectivityValidator;
-import school.hei.federationagricoleapi.validator.MemberValidator;
+import school.hei.federationagricoleapi.validator.MemberCollectivityValidator;
 
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
 public class CollectivityController {
-    private final MemberValidator memberValidator;
+    private MemberCollectivityValidator memberCollectivityValidator;
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
 
@@ -27,8 +27,9 @@ public class CollectivityController {
     public ResponseEntity<?> createCollectivities(@RequestBody List<CreateCollectivityDTO> collectivities) {
         try {
             collectivityValidator.collectivityValidator(collectivities);
-            memberValidator.memberValidation(collectivities);
+            memberCollectivityValidator.memberCountValidator(collectivities);
             List<Collectivity> collectivitiesList = collectivityServices.createColectivity(collectivities);
+            memberCollectivityValidator.seniorCountValidator(collectivitiesList);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)

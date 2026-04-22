@@ -43,8 +43,10 @@ public class MemberRepository {
                     member.setEmail(rs.getString("email"));
                     member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
 
+
                     Timestamp timestamp = rs.getTimestamp("created_at");
                     member.setCreatedAt(timestamp == null ? Instant.now() : timestamp.toInstant());
+
 
                     return Optional.of(member);
                 }

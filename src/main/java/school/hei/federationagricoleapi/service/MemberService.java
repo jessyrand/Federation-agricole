@@ -27,7 +27,6 @@ public class MemberService {
         List<Member> members = new ArrayList<>();
 
         for (CreateMemberDTO dto : dtos) {
-
             if (Boolean.FALSE.equals(dto.getRegistrationFeePaid()) ||
                     Boolean.FALSE.equals(dto.getMembershipDuesPaid())) {
                 throw new IllegalArgumentException("Fees not paid");
