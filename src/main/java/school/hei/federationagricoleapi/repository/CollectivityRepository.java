@@ -82,8 +82,8 @@ public class CollectivityRepository {
                        collectivities.add(coll);
                     }
                 }
-                return collectivities;
             }
+            return collectivities;
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
