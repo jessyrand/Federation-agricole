@@ -25,7 +25,6 @@ public class MemberService {
         List<Member> members = new ArrayList<>();
 
         for (CreateMemberDTO dto : dtos) {
-
             if (Boolean.FALSE.equals(dto.getRegistrationFeePaid()) ||
                     Boolean.FALSE.equals(dto.getMembershipDuesPaid())) {
                 throw new IllegalArgumentException("Fees not paid");
@@ -51,7 +50,7 @@ public class MemberService {
             member.setGender(dto.getGender());
             member.setAddress(dto.getAddress());
             member.setProfession(dto.getProfession());
-            member.setPhoneNumber(String.valueOf(dto.getPhoneNumber())); // ⚠️ conversion
+            member.setPhoneNumber(String.valueOf(dto.getPhoneNumber()));
             member.setEmail(dto.getEmail());
             member.setOccupation(dto.getOccupation());
             member.setCreatedAt(Instant.now());

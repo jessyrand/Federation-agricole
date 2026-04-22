@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -26,7 +27,7 @@ public class MemberRepository {
                 """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, id);
+            pstmt.setObject(1, UUID.fromString(id));
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Member member = new Member();
@@ -41,8 +42,8 @@ public class MemberRepository {
                     member.setEmail(rs.getString("email"));
                     member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
 
-                    String created_at = rs.getString("created_at");
-                    member.setCreatedAt(created_at == null ? Instant.now() : Instant.parse(created_at));
+                    Timestamp created_at = rs.getTimestamp("created_at");
+                    member.setCreatedAt((created_at != null) ? created_at.toInstant() : Instant.now());
 
                     return Optional.of(member);
                 }

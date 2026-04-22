@@ -1,8 +1,9 @@
 package school.hei.federationagricoleapi.validator;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Component;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.DTO.StructureDTO;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 
 import java.util.List;
 
@@ -10,14 +11,29 @@ import java.util.List;
 public class CollectivityValidator {
     public void collectivityValidator(List<CreateCollectivityDTO> createCollectivityDTO) throws BadRequestException {
         for (CreateCollectivityDTO createCollectivity : createCollectivityDTO) {
-            if (!createCollectivity.getFederationApproval()
-                    || createCollectivity.getStructure().getPresident_id() == null || createCollectivity.getStructure().getPresident_id().isEmpty()
-                    || createCollectivity.getStructure().getVicePresident_id() == null || createCollectivity.getStructure().getVicePresident_id().isEmpty()
-                    || createCollectivity.getStructure().getTreasurer_id() == null || createCollectivity.getStructure().getTreasurer_id().isEmpty()
-                    || createCollectivity.getStructure().getSecretary_id() == null || createCollectivity.getStructure().getSecretary_id().isEmpty()
-            ) {
+            if (Boolean.FALSE.equals(createCollectivity.getFederationApproval())) {
+                System.out.println("FD");
+                throw new BadRequestException("Collectivity without federation approval or structure missing.");
+            }
+
+            StructureDTO structure = createCollectivity.getStructure();
+            if (structure == null) {
+                System.out.println("Struct");
+                throw new BadRequestException("Collectivity without federation approval or structure missing.");
+            }
+
+            if (isNullOrEmpy(structure.getPresident()) || isNullOrEmpy(structure.getVicePresident())
+                || isNullOrEmpy(structure.getTreasurer()) ||  isNullOrEmpy(structure.getSecretary())) {
+                System.out.println("sec:" + structure.getSecretary());
+                System.out.println("tres:" + structure.getTreasurer());
+                System.out.println("vc:" + structure.getVicePresident());
+                System.out.println("pr:" + structure.getPresident());
                 throw new BadRequestException("Collectivity without federation approval or structure missing.");
             }
         }
+    }
+
+    private boolean isNullOrEmpy(String str) {
+        return str == null || str.isEmpty();
     }
 }

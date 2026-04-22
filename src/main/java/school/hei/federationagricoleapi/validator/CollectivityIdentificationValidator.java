@@ -1,8 +1,8 @@
 package school.hei.federationagricoleapi.validator;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Component;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 
