@@ -41,17 +41,19 @@ public class CollectivityRepository {
         }
     }
 
-    public Collectivity getById(String id) {
+    public Optional<Collectivity> findById(String id) {
         String sql = """
                 select id, location, president_id, vice_president_id, treasurer_id, secretary_id
                 from collectivities
                 where id = ?
                 """;
         
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-            ResultSet rs = pstm.executeQuery()) {
-            if (rs.next()) {
-                return saveCollectivityInfo(rs);
+        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
+            pstm.setString(1, id);
+            try (ResultSet rs = pstm.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(saveCollectivityInfo(rs));
+                }
             }
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
