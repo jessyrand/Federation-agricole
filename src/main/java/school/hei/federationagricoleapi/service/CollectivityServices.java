@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class CollectivityServices {
-  private final CollectivityRepository collectivityRepository;
+    private final CollectivityRepository collectivityRepository;
     private final MemberRepository memberRepository;
 
     public List<Collectivity> createColectivity(List<CreateCollectivityDTO> collectivities) {
@@ -48,4 +48,5 @@ public class CollectivityServices {
         dto.getNumber(),
         dto.getName());
   }
+
 }

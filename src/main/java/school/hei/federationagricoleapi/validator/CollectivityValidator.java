@@ -3,6 +3,7 @@ package school.hei.federationagricoleapi.validator;
 import org.springframework.stereotype.Component;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
 import school.hei.federationagricoleapi.entity.DTO.StructureDTO;
+import school.hei.federationagricoleapi.entity.Member;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 
 import java.util.List;

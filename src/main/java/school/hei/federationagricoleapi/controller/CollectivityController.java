@@ -15,6 +15,7 @@ import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityServices;
 import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
 import school.hei.federationagricoleapi.validator.CollectivityValidator;
+import school.hei.federationagricoleapi.validator.MemberCollectivityValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 public class CollectivityController {
+    private MemberCollectivityValidator memberCollectivityValidator;
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
     private CollectivityIdentificationValidator collectivityIdentificationValidator;
@@ -30,7 +32,9 @@ public class CollectivityController {
     public ResponseEntity<?> createCollectivities(@RequestBody List<CreateCollectivityDTO> collectivities) {
         try {
             collectivityValidator.collectivityValidator(collectivities);
+            memberCollectivityValidator.memberCountValidator(collectivities);
             List<Collectivity> collectivitiesList = collectivityServices.createColectivity(collectivities);
+            memberCollectivityValidator.seniorCountValidator(collectivitiesList);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
