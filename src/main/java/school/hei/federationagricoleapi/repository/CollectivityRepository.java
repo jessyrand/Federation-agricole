@@ -23,8 +23,7 @@ public class CollectivityRepository {
 
     public List<Collectivity> getAllCollectivities() {
         String sql = """
-                select id, location, president_id, vice_president_id, treasurer_id, secretary_id
-                from collectivities
+                select id, number, name, location, president_id, vice_president_id, treasurer_id, secretary_id
                 """;
         List<Collectivity> collectivities = new ArrayList<>();
 
@@ -120,6 +119,8 @@ public class CollectivityRepository {
     private Collectivity saveCollectivityInfo(ResultSet rs) throws SQLException {
         Collectivity collectivity = new Collectivity();
         collectivity.setId(rs.getString("id"));
+        collectivity.setNumber(rs.getString("number"));
+        collectivity.setName(rs.getString("name"));
         collectivity.setLocation(rs.getString("location"));
 
         collectivity.setPresident(memberRepository.findById(rs.getString("president_id")).orElse(null));
@@ -144,6 +145,48 @@ public class CollectivityRepository {
             }
             return members;
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean existsByName(String name) {
+        String sql = "select 1 from collectivities where name = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Collectivity updateIdentification(String id, String number, String name) {
+        String sql = """
+        update collectivities
+        set number = ?, name = ?
+        where id = ?
+        returning id, number, name, location, president_id, vice_president_id, treasurer_id, secretary_id
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, number);
+            pstmt.setString(2, name);
+            pstmt.setString(3, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return saveCollectivityInfo(rs);
+                }
+                else {
+                    throw new RuntimeException("Update failed");
+                }
+            }
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

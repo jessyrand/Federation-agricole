@@ -14,13 +14,12 @@ import school.hei.federationagricoleapi.service.MemberService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/members")
 @AllArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping
+    @PostMapping("/members")
     public ResponseEntity<List<Member>> createMembers(@RequestBody List<CreateMemberDTO> membersDTO) {
         List<Member> members = memberService.createMembers(membersDTO);
         return ResponseEntity
