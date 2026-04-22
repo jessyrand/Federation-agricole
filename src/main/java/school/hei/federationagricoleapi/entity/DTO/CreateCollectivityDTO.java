@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 public class CreateCollectivityDTO {
     private String location;
     private boolean federationApproval;
-    private String vicePresident;
-    private String treasurer;
-    private String secretary;
+    private String President_id;
+    private String vicePresident_id;
+    private String treasurer_id;
+    private String secretary_id;
+    private Boolean authorization;
 }
