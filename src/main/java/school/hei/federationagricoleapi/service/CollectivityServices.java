@@ -9,6 +9,7 @@ import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.MemberRepository;
+import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.List;
 public class CollectivityServices {
     private final CollectivityRepository collectivityRepository;
     private final MemberRepository memberRepository;
+    private CollectivityIdentificationValidator collectivityIdentificationValidator;
 
     public List<Collectivity> createColectivity(List<CreateCollectivityDTO> collectivities) {
         List<Collectivity> collectivitiesList = collectivityRepository.save(collectivities);
@@ -34,16 +36,16 @@ public class CollectivityServices {
         }
 
         Collectivity collectivity = collectivityRepository.findById(dto.getId()).orElse(null);
-
+        collectivityIdentificationValidator.validateIdentification(collectivity);
 
 
         collectivity.setNumber(dto.getNumber());
         collectivity.setName(dto.getName());
 
         return collectivityRepository.updateIdentification(
-                dto.getId(),
-                dto.getNumber(),
-                dto.getName()
+                collectivity.getId(),
+                collectivity.getNumber(),
+                collectivity.getName()
         );
     }
 }
