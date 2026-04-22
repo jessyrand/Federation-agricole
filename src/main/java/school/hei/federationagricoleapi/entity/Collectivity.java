@@ -12,6 +12,7 @@ import java.util.List;
 public class Collectivity {
     private String id;
     private String location;
+    private List<Member> members;
     private Member president;
     private Member vicePresident;
     private Member treasurer;

@@ -21,7 +21,7 @@ public class CollectivityController {
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
 
-    @PostMapping("/collectivitess")
+    @PostMapping("/collectivities")
     public ResponseEntity<?> createCollectivities(@RequestBody List<CreateCollectivityDTO> collectivities) {
         try {
             collectivityValidator.collectivityValidator(collectivities);

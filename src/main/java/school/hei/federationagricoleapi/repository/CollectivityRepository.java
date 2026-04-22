@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.Member;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 
 import java.sql.Connection;
@@ -59,34 +60,63 @@ public class CollectivityRepository {
         }
     }
 
-    public List<Collectivity> save (List<CreateCollectivityDTO> collectivity) {
+    public List<Collectivity> save (List<CreateCollectivityDTO> collectivities) {
         String sql = """
                    insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)
                    values (?, ?, ?, ?, ?)
                    returning id
                 """;
-        List<Collectivity> collectivities = new ArrayList<>();
+        List<Collectivity> collectivitiesList = new ArrayList<>();
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            for (CreateCollectivityDTO collectivityDTO : collectivity) {
-                pstmt.setString(1, collectivityDTO.getLocation());
-                pstmt.setString(2, collectivityDTO.getPresident_id());
-                pstmt.setString(3, collectivityDTO.getVicePresident_id());
-                pstmt.setString(4, collectivityDTO.getTreasurer_id());
-                pstmt.setString(5, collectivityDTO.getSecretary_id());
+            for (CreateCollectivityDTO collectivity : collectivities) {
+                pstmt.setString(1, collectivity.getLocation());
+                pstmt.setString(2, collectivity.getStructure().getPresident_id());
+                pstmt.setString(3, collectivity.getStructure().getVicePresident_id());
+                pstmt.setString(4, collectivity.getStructure().getTreasurer_id());
+                pstmt.setString(5, collectivity.getStructure().getSecretary_id());
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
                        Collectivity coll = saveCollectivityInfo(rs);
+                       coll.setMembers(addMemberToCollectivity(collectivity, coll.getId()));
 
-                       collectivities.add(coll);
+                       collectivitiesList.add(coll);
                     }
                 }
             }
-            return collectivities;
+            System.out.println(collectivitiesList);
+            return collectivitiesList;
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public List<Member> addMemberToCollectivity(CreateCollectivityDTO collectivity, String collectivity_id) {
+        String sql = """
+                insert into member_collectivity (member_id, collectivity_id)
+                VALUES (?, ?)
+                """;
+
+        List<Member> members = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                for (String id : collectivity.getMember_id()) {
+                    pstmt.setString(1, id);
+                }
+                pstmt.setString(2, collectivity_id);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String id = rs.getString("id");
+                        members.add(memberRepository.findById(id).orElse(null));
+                    }
+                }
+            return members;
+        }
+        catch (SQLException e) {
+            throw  new RuntimeException(e);
         }
     }
 

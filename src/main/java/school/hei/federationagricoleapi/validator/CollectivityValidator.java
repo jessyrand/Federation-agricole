@@ -10,11 +10,11 @@ import java.util.List;
 public class CollectivityValidator {
     public void collectivityValidator(List<CreateCollectivityDTO> createCollectivityDTO) throws BadRequestException {
         for (CreateCollectivityDTO createCollectivity : createCollectivityDTO) {
-            if (!createCollectivity.getAuthorization()
-                    || createCollectivity.getPresident_id() == null || createCollectivity.getPresident_id().isEmpty()
-                    || createCollectivity.getVicePresident_id() == null || createCollectivity.getVicePresident_id().isEmpty()
-                    || createCollectivity.getTreasurer_id() == null || createCollectivity.getTreasurer_id().isEmpty()
-                    || createCollectivity.getSecretary_id() == null || createCollectivity.getSecretary_id().isEmpty()
+            if (!createCollectivity.getFederationApproval()
+                    || createCollectivity.getStructure().getPresident_id() == null || createCollectivity.getStructure().getPresident_id().isEmpty()
+                    || createCollectivity.getStructure().getVicePresident_id() == null || createCollectivity.getStructure().getVicePresident_id().isEmpty()
+                    || createCollectivity.getStructure().getTreasurer_id() == null || createCollectivity.getStructure().getTreasurer_id().isEmpty()
+                    || createCollectivity.getStructure().getSecretary_id() == null || createCollectivity.getStructure().getSecretary_id().isEmpty()
             ) {
                 throw new BadRequestException("Collectivity without federation approval or structure missing.");
             }

@@ -7,13 +7,13 @@ create table members (
      id uuid primary key default pg_catalog.gen_random_uuid(),
      first_name varchar(50) not null,
      last_name varchar(50) not null,
-     birth_date date,
-     gender gender_enum,
-     address varchar(255),
-     profession varchar(255),
-     phone_number varchar(10),
-     email varchar(255),
-     occupation member_occupation_enum,
+     birth_date date not null ,
+     gender gender_enum not null ,
+     address varchar(255)not null,
+     profession varchar(255)not null,
+     phone_number varchar(10)not null,
+     email varchar(255)not null,
+     occupation member_occupation_enum not null,
      created_at timestamp without time zone default now()
 );
 

@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateCollectivityDTO {
-    private String location;
-    private Boolean federationApproval;
-    private String[] member_id;
-    private StructureDTO structure;
+public class StructureDTO {
+    private String President_id;
+    private String vicePresident_id;
+    private String treasurer_id;
+    private String secretary_id;
 }
