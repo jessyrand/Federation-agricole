@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -26,7 +27,8 @@ public class MemberRepository {
                 """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, id);
+            pstmt.setObject(1, UUID.fromString(id));
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Member member = new Member();
@@ -41,29 +43,44 @@ public class MemberRepository {
                     member.setEmail(rs.getString("email"));
                     member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
 
-                    String created_at = rs.getString("created_at");
-                    member.setCreatedAt(created_at == null ? Instant.now() : Instant.parse(created_at));
+                    Timestamp timestamp = rs.getTimestamp("created_at");
+                    member.setCreatedAt(timestamp == null ? Instant.now() : timestamp.toInstant());
 
                     return Optional.of(member);
                 }
                 return Optional.empty();
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public boolean existsAnyMember() {
+        String sql = """
+        select id
+        from members
+        limit 1
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public List<Member> saveAll(List<Member> members) {
         String sql = """
-        insert into members (
-            first_name, last_name, birth_date,
-            gender, address, profession, phone_number,
-            email, occupation, created_at
-        )
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        returning id
-    """;
+            insert into members (
+                first_name, last_name, birth_date,
+                gender, address, profession, phone_number,
+                email, occupation, created_at
+            )
+            values (?, ?, ?, ?::gender_enum, ?, ?, ?, ?, ?::member_occupation_enum, ?)
+            returning id
+        """;
 
         List<Member> savedMembers = new ArrayList<>();
 
@@ -80,11 +97,15 @@ public class MemberRepository {
                 pstmt.setString(7, member.getPhoneNumber());
                 pstmt.setString(8, member.getEmail());
                 pstmt.setString(9, member.getOccupation().name());
-                pstmt.setString(10, Instant.now().toString());
+                pstmt.setTimestamp(10, Timestamp.from(Instant.now()));
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
                         member.setId(rs.getString("id"));
+
+                        insertMemberCollectivity(member.getId(), member.getCollectivity().getId());
+                        insertMemberReferees(member.getId(), member.getReferees());
+
                         savedMembers.add(member);
                     }
                 }
@@ -94,6 +115,36 @@ public class MemberRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void insertMemberCollectivity(String memberId, String collectivityId) throws SQLException {
+        String sql = """
+            insert into member_collectivity (member_id, collectivity_id)
+            values (?, ?)
+        """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setObject(1, UUID.fromString(memberId));
+            pstmt.setObject(2, UUID.fromString(collectivityId));
+            pstmt.executeUpdate();
+        }
+    }
+
+    private void insertMemberReferees(String memberId, List<Member> referees) throws SQLException {
+        if (referees == null || referees.isEmpty()) return;
+
+        String sql = """
+            insert into member_referees (member_id, referee_id)
+            values (?, ?)
+        """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            for (Member referee : referees) {
+                pstmt.setObject(1, UUID.fromString(memberId));
+                pstmt.setObject(2, UUID.fromString(referee.getId()));
+                pstmt.executeUpdate();
+            }
         }
     }
 }

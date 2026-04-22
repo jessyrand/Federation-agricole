@@ -4,20 +4,15 @@ import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityServices;
-import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
 import school.hei.federationagricoleapi.validator.CollectivityValidator;
 import school.hei.federationagricoleapi.validator.MemberValidator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,7 +21,7 @@ public class CollectivityController {
     private final MemberValidator memberValidator;
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
-    private CollectivityIdentificationValidator collectivityIdentificationValidator;
+
 
     @PostMapping("/collectivities")
     public ResponseEntity<?> createCollectivities(@RequestBody List<CreateCollectivityDTO> collectivities) {
@@ -56,11 +51,13 @@ public class CollectivityController {
         }
     }
 
-    @PutMapping("/collectivities/identify")
-    public ResponseEntity<?> identifyCollectivity(@RequestBody CollectivityIdentificationDTO dto) {
+    @PutMapping("/collectivities/{id}/informations")
+    public ResponseEntity<?> identifyCollectivity(
+            @PathVariable String id,
+            @RequestBody CollectivityIdentificationDTO dto
+    ) {
         try {
-            collectivityIdentificationValidator.validateIdentification(dto);
-            Collectivity collectivity = collectivityServices.identifyCollectivity(dto);
+            Collectivity collectivity = collectivityServices.identifyCollectivity(id, dto);
 
             return ResponseEntity
                     .status(HttpStatus.OK)

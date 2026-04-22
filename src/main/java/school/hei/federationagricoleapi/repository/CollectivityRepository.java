@@ -42,13 +42,13 @@ public class CollectivityRepository {
 
     public Optional<Collectivity> findById(String id) {
         String sql = """
-                select id, location, president_id, vice_president_id, treasurer_id, secretary_id
+                select id, number, name, location, president_id, vice_president_id, treasurer_id, secretary_id
                 from collectivities
                 where id = ?
                 """;
         
         try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setString(1, id);
+            pstm.setObject(1, java.util.UUID.fromString(id));
             try (ResultSet rs = pstm.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(saveCollectivityInfo(rs));
@@ -72,10 +72,10 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             for (CreateCollectivityDTO collectivity : collectivities) {
                 pstmt.setString(1, collectivity.getLocation());
-                pstmt.setString(2, collectivity.getStructure().getPresident_id());
-                pstmt.setString(3, collectivity.getStructure().getVicePresident_id());
-                pstmt.setString(4, collectivity.getStructure().getTreasurer_id());
-                pstmt.setString(5, collectivity.getStructure().getSecretary_id());
+                pstmt.setObject(2, java.util.UUID.fromString(collectivity.getStructure().getPresident_id()));
+                pstmt.setObject(3, java.util.UUID.fromString(collectivity.getStructure().getVicePresident_id()));
+                pstmt.setObject(4, java.util.UUID.fromString(collectivity.getStructure().getTreasurer_id()));
+                pstmt.setObject(5, java.util.UUID.fromString(collectivity.getStructure().getSecretary_id()));
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -104,8 +104,8 @@ public class CollectivityRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 for (String id : collectivity.getMember_id()) {
-                    pstmt.setString(1, id);
-                    pstmt.setString(2, collectivity_id);
+                    pstmt.setObject(1, java.util.UUID.fromString(id));
+                    pstmt.setObject(2, java.util.UUID.fromString(collectivity_id));
                     pstmt.executeUpdate();
                     memberRepository.findById(id).ifPresent(members::add);
                 }
@@ -119,7 +119,8 @@ public class CollectivityRepository {
     private Collectivity saveCollectivityInfo(ResultSet rs) throws SQLException {
         Collectivity collectivity = new Collectivity();
         collectivity.setId(rs.getString("id"));
-        collectivity.setNumber(rs.getString("number"));
+        int number = rs.getInt("number");
+        collectivity.setNumber(rs.wasNull() ? null : number);
         collectivity.setName(rs.getString("name"));
         collectivity.setLocation(rs.getString("location"));
 
@@ -137,7 +138,7 @@ public class CollectivityRepository {
             """;
         List<Member> members = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, collectivityId);
+            pstmt.setObject(1, java.util.UUID.fromString(collectivityId));
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     memberRepository.findById(rs.getString("member_id")).ifPresent(members::add);
@@ -164,7 +165,7 @@ public class CollectivityRepository {
         }
     }
 
-    public Collectivity updateIdentification(String id, String number, String name) {
+    public Collectivity updateIdentification(String id, Integer number, String name) {
         String sql = """
         update collectivities
         set number = ?, name = ?
@@ -173,9 +174,9 @@ public class CollectivityRepository {
     """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, number);
+            pstmt.setInt(1, number);
             pstmt.setString(2, name);
-            pstmt.setString(3, id);
+            pstmt.setObject(3, java.util.UUID.fromString(id));
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
