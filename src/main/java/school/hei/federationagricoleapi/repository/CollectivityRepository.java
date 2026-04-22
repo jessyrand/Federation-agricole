@@ -41,22 +41,25 @@ public class CollectivityRepository {
         }
     }
 
-    public Collectivity getById(String id) {
+    public Optional<Collectivity> findById(String identifier) {
         String sql = """
-                select id, location, president_id, vice_president_id, treasurer_id, secretary_id
-                from collectivities
-                where id = ?
-                """;
-        
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-            ResultSet rs = pstm.executeQuery()) {
-            if (rs.next()) {
-                return saveCollectivityInfo(rs);
+        select id, location, president_id, vice_president_id, treasurer_id, secretary_id
+        from collectivities
+        where id = ?
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, identifier);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(saveCollectivityInfo(rs));
+                }
+                return Optional.empty();
             }
-            throw new NotFoundException("Collectivity with id " + id + " not found");
-        }
-        catch (SQLException e) {
-            throw  new RuntimeException(e);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

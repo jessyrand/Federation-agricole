@@ -7,6 +7,7 @@ import school.hei.federationagricoleapi.entity.Gender;
 import school.hei.federationagricoleapi.entity.MemberOccupation;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,11 +19,11 @@ public class CreateMemberDTO {
     private Gender gender;
     private String address;
     private String profession;
-    private Integer phoneNumber;
+    private String phoneNumber;
     private String email;
     private MemberOccupation occupation;
     private String collectivityIdentifier;
-    private String[] referees;
+    private List<String> referees;
     private Boolean registrationFeePaid;
     private Boolean membershipDuesPaid;
 }
