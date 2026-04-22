@@ -6,9 +6,7 @@ import school.hei.federationagricoleapi.entity.Collectivity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -17,7 +15,7 @@ public class CollectivityRepository {
 
     public void save (Collectivity collectivity) {
         String sql = """
-                   insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)  
+                   insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)
                    values (?, ?, ?, ?, ?)
                 """;
 

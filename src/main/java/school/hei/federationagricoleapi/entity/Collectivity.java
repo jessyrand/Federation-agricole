@@ -11,10 +11,9 @@ import java.util.List;
 @Data
 public class Collectivity {
     private String id;
-
     private String location;
-
-    private CollectivityStructure structure;
-
-    private List<Member> members;
+    private Member president;
+    private Member vicePresident;
+    private Member treasurer;
+    private Member secretary;
 }
