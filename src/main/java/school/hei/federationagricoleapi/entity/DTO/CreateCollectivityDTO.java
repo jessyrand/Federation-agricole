@@ -1,4 +1,4 @@
-package school.hei.federationagricoleapi.entity;
+package school.hei.federationagricoleapi.entity.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,6 @@ import java.util.List;
 public class CreateCollectivityDTO {
     private String location;
     private boolean federationApproval;
-    private String president;
     private String vicePresident;
     private String treasurer;
     private String secretary;
