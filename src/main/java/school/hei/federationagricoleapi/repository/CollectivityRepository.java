@@ -41,19 +41,21 @@ public class CollectivityRepository {
         }
     }
 
-    public Collectivity getById(String id) {
+    public Optional<Collectivity> findById(String id) {
         String sql = """
                 select id, location, president_id, vice_president_id, treasurer_id, secretary_id
                 from collectivities
                 where id = ?
                 """;
         
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-            ResultSet rs = pstm.executeQuery()) {
-            if (rs.next()) {
-                return saveCollectivityInfo(rs);
+        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
+            pstm.setString(1, id);
+            try (ResultSet rs = pstm.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(saveCollectivityInfo(rs));
+                }
             }
-            throw new NotFoundException("Collectivity with id " + id + " not found");
+            return Optional.empty();
         }
         catch (SQLException e) {
             throw  new RuntimeException(e);
@@ -64,7 +66,7 @@ public class CollectivityRepository {
         String sql = """
                    insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)
                    values (?, ?, ?, ?, ?)
-                   returning id
+                   returning id, location, president_id, vice_president_id, treasurer_id, secretary_id
                 """;
         List<Collectivity> collectivitiesList = new ArrayList<>();
 
@@ -104,16 +106,11 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 for (String id : collectivity.getMember_id()) {
                     pstmt.setString(1, id);
+                    pstmt.setString(2, collectivity_id);
+                    pstmt.executeUpdate();
+                    memberRepository.findById(id).ifPresent(members::add);
                 }
-                pstmt.setString(2, collectivity_id);
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        String id = rs.getString("id");
-                        members.add(memberRepository.findById(id).orElse(null));
-                    }
-                }
-            return members;
+           return members;
         }
         catch (SQLException e) {
             throw  new RuntimeException(e);
@@ -129,7 +126,25 @@ public class CollectivityRepository {
         collectivity.setVicePresident(memberRepository.findById(rs.getString("vice_president_id")).orElse(null));
         collectivity.setTreasurer(memberRepository.findById(rs.getString("treasurer_id")).orElse(null));
         collectivity.setSecretary(memberRepository.findById(rs.getString("secretary_id")).orElse(null));
-
+        collectivity.setMembers(getMembersOfCollectivity(rs.getString("id")));
         return collectivity;
+    }
+
+    private List<Member> getMembersOfCollectivity(String collectivityId) {
+        String sql = """
+            SELECT member_id FROM member_collectivity WHERE collectivity_id = ?
+            """;
+        List<Member> members = new ArrayList<>();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, collectivityId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    memberRepository.findById(rs.getString("member_id")).ifPresent(members::add);
+                }
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
