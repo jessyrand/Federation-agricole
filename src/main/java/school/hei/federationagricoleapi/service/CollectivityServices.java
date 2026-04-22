@@ -28,14 +28,14 @@ public class CollectivityServices {
         return collectivitiesList;
     }
 
-    public Collectivity identifyCollectivity(CollectivityIdentificationDTO dto)
+    public Collectivity identifyCollectivity(String id, CollectivityIdentificationDTO dto)
             throws NotFoundException, BadRequestException {
 
-        if (dto.getId() == null || dto.getNumber() == null || dto.getName() == null) {
+        if (id == null || dto.getNumber() == null || dto.getName() == null) {
             throw new BadRequestException("Missing required fields");
         }
 
-        Collectivity collectivity = collectivityRepository.findById(dto.getId()).orElse(null);
+        Collectivity collectivity = collectivityRepository.findById(id).orElse(null);
         collectivityIdentificationValidator.validateIdentification(collectivity);
 
 
