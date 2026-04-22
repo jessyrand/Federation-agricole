@@ -59,6 +59,37 @@ public class CollectivityRepository {
         }
     }
 
+    public List<Collectivity> save (List<CreateCollectivityDTO> collectivity) {
+        String sql = """
+                   insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)
+                   values (?, ?, ?, ?, ?)
+                   returning id
+                """;
+        List<Collectivity> collectivities = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            for (CreateCollectivityDTO collectivityDTO : collectivity) {
+                pstmt.setString(1, collectivityDTO.getLocation());
+                pstmt.setString(2, collectivityDTO.getPresident_id());
+                pstmt.setString(3, collectivityDTO.getVicePresident_id());
+                pstmt.setString(4, collectivityDTO.getTreasurer_id());
+                pstmt.setString(5, collectivityDTO.getSecretary_id());
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                       Collectivity coll = saveCollectivityInfo(rs);
+
+                       collectivities.add(coll);
+                    }
+                }
+                return collectivities;
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Collectivity saveCollectivityInfo(ResultSet rs) throws SQLException {
         Collectivity collectivity = new Collectivity();
         collectivity.setId(rs.getString("id"));
@@ -70,33 +101,5 @@ public class CollectivityRepository {
         collectivity.setSecretary(memberRepository.findById(rs.getString("secretary_id")).orElse(null));
 
         return collectivity;
-    }
-
-    public String save (CreateCollectivityDTO collectivity) {
-        String sql = """
-                   insert into collectivities (location, president_id, vice_president_id, treasurer_id, secretary_id)
-                   values (?, ?, ?, ?, ?)
-                   returning id
-                """;
-        String id = null;
-
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, collectivity.getLocation());
-            pstmt.setString(2, collectivity.getPresident_id());
-            pstmt.setString(3, collectivity.getVicePresident_id());
-            pstmt.setString(4, collectivity.getTreasurer_id());
-            pstmt.setString(5, collectivity.getSecretary_id());
-            pstmt.executeUpdate();
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    id = rs.getString("id");
-                }
-            }
-            return id;
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
