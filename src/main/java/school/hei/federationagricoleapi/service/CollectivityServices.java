@@ -1,18 +1,17 @@
 package school.hei.federationagricoleapi.service;
 
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.Member;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.MemberRepository;
 import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -23,10 +22,15 @@ public class CollectivityServices {
     private CollectivityIdentificationValidator collectivityIdentificationValidator;
 
     public List<Collectivity> createColectivity(List<CreateCollectivityDTO> collectivities) {
-        List<Collectivity> collectivitiesList = collectivityRepository.save(collectivities);
-
-        return collectivitiesList;
+    List<Collectivity> collectivitiesList = collectivityRepository.save(collectivities);
+    for (Collectivity collectivity : collectivitiesList) {
+        for (Member member: collectivity.getMembers()) {
+            if (memberRepository.findById(member.getId()).isEmpty()) {
+                throw new NotFoundException("Member not found");
+            }
+        }
     }
+
 
     public Collectivity identifyCollectivity(String id, CollectivityIdentificationDTO dto)
             throws NotFoundException, BadRequestException {
@@ -38,14 +42,14 @@ public class CollectivityServices {
         Collectivity collectivity = collectivityRepository.findById(id).orElse(null);
         collectivityIdentificationValidator.validateIdentification(collectivity);
 
+    Collectivity collectivity = collectivityRepository.findById(dto.getId()).orElse(null);
+    collectivity.setNumber(dto.getNumber());
+    collectivity.setName(dto.getName());
 
-        collectivity.setNumber(dto.getNumber());
-        collectivity.setName(dto.getName());
+    return collectivityRepository.updateIdentification(
+        dto.getId(),
+        dto.getNumber(),
+        dto.getName());
+  }
 
-        return collectivityRepository.updateIdentification(
-                collectivity.getId(),
-                collectivity.getNumber(),
-                collectivity.getName()
-        );
-    }
 }

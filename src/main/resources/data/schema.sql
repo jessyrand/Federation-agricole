@@ -35,7 +35,7 @@ create table member_referees (
     member_id uuid references members(id) on delete cascade,
     referee_id uuid references members(id) on delete cascade,
     primary key (member_id, referee_id)
-)
+);
 
 ALTER TABLE collectivities
     ADD COLUMN number VARCHAR UNIQUE,
