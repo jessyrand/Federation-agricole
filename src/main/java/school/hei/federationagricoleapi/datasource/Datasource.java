@@ -1,5 +1,6 @@
 package school.hei.federationagricoleapi.datasource;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 
 @Configuration
 public class Datasource {
+    @Bean
     public Connection getConnection() {
         try {
             String url = System.getenv("DB_URL");
