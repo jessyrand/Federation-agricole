@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityServices;
 import school.hei.federationagricoleapi.validator.CollectivityValidator;
+import school.hei.federationagricoleapi.validator.MemberValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 public class CollectivityController {
+    private final MemberValidator memberValidator;
     private CollectivityServices collectivityServices;
     private CollectivityValidator collectivityValidator;
 
@@ -25,11 +28,17 @@ public class CollectivityController {
     public ResponseEntity<?> createCollectivities(@RequestBody List<CreateCollectivityDTO> collectivities) {
         try {
             collectivityValidator.collectivityValidator(collectivities);
+            memberValidator.memberValidation(collectivities);
             List<Collectivity> collectivitiesList = collectivityServices.createColectivity(collectivities);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(collectivitiesList);
+        }
+        catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
         }
         catch (BadRequestException e) {
             return ResponseEntity
