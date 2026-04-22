@@ -6,11 +6,10 @@ import school.hei.federationagricoleapi.entity.Gender;
 import school.hei.federationagricoleapi.entity.Member;
 import school.hei.federationagricoleapi.entity.MemberOccupation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -51,6 +50,49 @@ public class MemberRepository {
             }
         }
         catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Member> saveAll(List<Member> members) {
+        String sql = """
+        insert into members (
+            first_name, last_name, birth_date,
+            gender, address, profession, phone_number,
+            email, occupation, created_at
+        )
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        returning id
+    """;
+
+        List<Member> savedMembers = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            for (Member member : members) {
+
+                pstmt.setString(1, member.getFirstName());
+                pstmt.setString(2, member.getLastName());
+                pstmt.setDate(3, Date.valueOf(member.getBirthDate()));
+                pstmt.setString(4, member.getGender().name());
+                pstmt.setString(5, member.getAddress());
+                pstmt.setString(6, member.getProfession());
+                pstmt.setString(7, member.getPhoneNumber());
+                pstmt.setString(8, member.getEmail());
+                pstmt.setString(9, member.getOccupation().name());
+                pstmt.setString(10, Instant.now().toString());
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        member.setId(rs.getString("id"));
+                        savedMembers.add(member);
+                    }
+                }
+            }
+
+            return savedMembers;
+
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
