@@ -84,7 +84,6 @@ public class CollectivityServices {
       
     }
 
-        return collectivity;
     public List<Account> getFinancialAccount (String collectivityId, Instant at) {
         collectivityRepository.findById(collectivityId)
                 .orElseThrow(() -> new NotFoundException("Collectivity not found"));
