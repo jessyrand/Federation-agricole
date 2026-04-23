@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -50,7 +49,7 @@ public class CollectivityRepository {
                 """;
         
         try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setObject(1, UUID.fromString(id));
+            pstm.setString(1, id);
             try (ResultSet rs = pstm.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(saveCollectivityInfo(rs));
@@ -74,10 +73,10 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             for (CreateCollectivityDTO collectivity : collectivities) {
                 pstmt.setString(1, collectivity.getLocation());
-                pstmt.setObject(2, UUID.fromString(collectivity.getStructure().getPresident()));
-                pstmt.setObject(3, UUID.fromString(collectivity.getStructure().getVicePresident()));
-                pstmt.setObject(4, UUID.fromString(collectivity.getStructure().getTreasurer()));
-                pstmt.setObject(5, UUID.fromString(collectivity.getStructure().getSecretary()));
+                pstmt.setString(2, collectivity.getStructure().getPresident());
+                pstmt.setString(3, collectivity.getStructure().getVicePresident());
+                pstmt.setString(4, collectivity.getStructure().getTreasurer());
+                pstmt.setString(5, collectivity.getStructure().getSecretary());
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -106,8 +105,8 @@ public class CollectivityRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 for (String id : collectivity.getMembers()) {
-                    pstmt.setObject(1, UUID.fromString(id));
-                    pstmt.setObject(2, UUID.fromString(idCollectivity));
+                    pstmt.setString(1, id);
+                    pstmt.setString(2, idCollectivity);
 
                     pstmt.executeUpdate();
                     memberRepository.findById(id).ifPresent(members::add);
@@ -141,7 +140,7 @@ public class CollectivityRepository {
             """;
         List<Member> members = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(collectivityId));
+            pstmt.setString( 1, collectivityId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     memberRepository.findById(rs.getString("member_id")).ifPresent(members::add);
@@ -179,7 +178,7 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, number);
             pstmt.setString(2, name);
-            pstmt.setObject(3, java.util.UUID.fromString(id));
+            pstmt.setString(3, id);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -216,7 +215,7 @@ public class CollectivityRepository {
            List<CollectivityTransaction> transactions = new ArrayList<>();
 
            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setObject(1, UUID.fromString(collectivityId));
+                pstmt.setString(1, collectivityId);
                 pstmt.setTimestamp(2, Timestamp.from(from));
                 pstmt.setTimestamp(3, Timestamp.from(to));
 

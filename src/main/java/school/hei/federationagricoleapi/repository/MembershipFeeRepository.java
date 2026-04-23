@@ -10,7 +10,6 @@ import school.hei.federationagricoleapi.entity.MembershipFee;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -31,7 +30,7 @@ public class MembershipFeeRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
-            pstmt.setObject(1, UUID.fromString(collectivityId));
+            pstmt.setString(1, collectivityId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
 
@@ -79,7 +78,7 @@ public class MembershipFeeRepository {
 
             for (CreateMembershipFeeDTO dto : dtos) {
 
-                pstmt.setObject(1, UUID.fromString(collectivityId));
+                pstmt.setString(1, collectivityId);
                 pstmt.setDate(2, Date.valueOf(dto.getEligibleFrom()));
                 pstmt.setString(3, dto.getFrequency().name());
                 pstmt.setDouble(4, dto.getAmount());

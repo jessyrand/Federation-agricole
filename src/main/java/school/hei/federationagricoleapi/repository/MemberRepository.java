@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -27,7 +26,7 @@ public class MemberRepository {
                 """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(id));
+            pstmt.setString(1, id);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -127,8 +126,8 @@ public class MemberRepository {
         """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(memberId));
-            pstmt.setObject(2, UUID.fromString(collectivityId));
+            pstmt.setString(1,memberId);
+            pstmt.setString(2, collectivityId);
             pstmt.executeUpdate();
         }
     }
@@ -143,8 +142,8 @@ public class MemberRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             for (Member referee : referees) {
-                pstmt.setObject(1, UUID.fromString(memberId));
-                pstmt.setObject(2, UUID.fromString(referee.getId()));
+                pstmt.setString(1, memberId);
+                pstmt.setString(2, referee.getId());
                 pstmt.executeUpdate();
             }
         }

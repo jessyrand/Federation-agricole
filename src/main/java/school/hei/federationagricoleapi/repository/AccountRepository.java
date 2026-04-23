@@ -32,7 +32,7 @@ public class AccountRepository {
                 """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(accountId));
+            pstmt.setString(1, accountId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     String id = rs.getString("id");
@@ -87,7 +87,7 @@ public class AccountRepository {
         List<Account> accounts = new ArrayList<>();
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(collectivityId));
+            pstmt.setString(1, collectivityId);
             pstmt.setTimestamp(2, Timestamp.from(at));
 
             try (ResultSet rs = pstmt.executeQuery()) {
