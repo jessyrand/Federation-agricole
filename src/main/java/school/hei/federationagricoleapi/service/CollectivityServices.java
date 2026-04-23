@@ -72,6 +72,19 @@ public class CollectivityServices {
         return transactionRepository.findByCollectivityIdAndDateBetween(collectivityId, from, to);
     }
 
+    public Collectivity getById(String id) {
+
+        Collectivity collectivity = collectivityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Collectivity not found"));
+
+        List<Member> members = memberRepository.findByCollectivityId(id);
+
+        collectivity.setMembers(members);
+      return collectivity;
+      
+    }
+
+        return collectivity;
     public List<Account> getFinancialAccount (String collectivityId, Instant at) {
         collectivityRepository.findById(collectivityId)
                 .orElseThrow(() -> new NotFoundException("Collectivity not found"));

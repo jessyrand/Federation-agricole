@@ -105,4 +105,55 @@ public class MembershipFeeRepository {
             throw new RuntimeException(e);
         }
     }
+
+    public Optional<MembershipFee> findById(String id) {
+
+        String sql = """
+        SELECT 
+            id,
+            eligible_from,
+            frequency,
+            amount,
+            label,
+            status
+        FROM membership_fee
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setString(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                if (rs.next()) {
+
+                    MembershipFee fee = new MembershipFee();
+
+                    fee.setId(rs.getString("id"));
+                    fee.setEligibleFrom(
+                            rs.getDate("eligible_from").toLocalDate()
+                    );
+                    fee.setFrequency(
+                            Frequency.valueOf(rs.getString("frequency"))
+                    );
+
+                    double amount = rs.getDouble("amount");
+                    fee.setAmount(rs.wasNull() ? null : amount);
+
+                    fee.setLabel(rs.getString("label"));
+                    fee.setStatus(
+                            ActivityStatus.valueOf(rs.getString("status"))
+                    );
+
+                    return Optional.of(fee);
+                }
+            }
+
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

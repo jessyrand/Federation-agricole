@@ -93,7 +93,9 @@ public class CollectivityController {
     public ResponseEntity<?> getMembershipFees(@PathVariable String id) {
         try {
             List<MembershipFee> fees = membershipFeeService.getFeesByCollectivity(id);
-            return ResponseEntity.ok(fees);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(fees);
         }
         catch (NotFoundException e) {
             return ResponseEntity
@@ -110,7 +112,9 @@ public class CollectivityController {
         try {
             List<MembershipFee> fees = membershipFeeService.createFees(id, dtos);
 
-            return ResponseEntity.ok(fees);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(fees);
         }
         catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -144,6 +148,21 @@ public class CollectivityController {
         }
     }
 
+    @GetMapping("/collectivities/{id}")
+    public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
+        try {
+            Collectivity collectivity = collectivityServices.getById(id);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(collectivity);
+        }
+           catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+          
     @GetMapping("/collectivities/{id}/financialAccounts")
     public ResponseEntity<?> getFinancialAccounts(
             @PathVariable String id,

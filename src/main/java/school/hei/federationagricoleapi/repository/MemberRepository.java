@@ -126,7 +126,7 @@ public class MemberRepository {
         """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1,memberId);
+            pstmt.setString(1, memberId);
             pstmt.setString(2, collectivityId);
             pstmt.executeUpdate();
         }
@@ -146,6 +146,81 @@ public class MemberRepository {
                 pstmt.setString(2, referee.getId());
                 pstmt.executeUpdate();
             }
+        }
+    }
+
+    public List<Member> findByCollectivityId(String collectivityId) {
+
+        String sql = """
+            SELECT
+                m.id,
+                m.first_name,
+                m.last_name,
+                m.birth_date,
+                m.gender,
+                m.address,
+                m.profession,
+                m.phone_number,
+                m.email,
+                m.occupation
+            FROM members m
+            JOIN member_collectivity mc ON m.id = mc.member_id
+            WHERE mc.collectivity_id = ?
+        """;
+
+        List<Member> members = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setString(1, collectivityId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Member member = new Member();
+
+                    member.setId(rs.getString("id"));
+                    member.setFirstName(rs.getString("first_name"));
+                    member.setLastName(rs.getString("last_name"));
+                    member.setBirthDate(rs.getDate("birth_date").toLocalDate());
+                    member.setGender(Gender.valueOf(rs.getString("gender")));
+                    member.setAddress(rs.getString("address"));
+                    member.setProfession(rs.getString("profession"));
+                    member.setPhoneNumber(rs.getString("phone_number"));
+                    member.setEmail(rs.getString("email"));
+                    member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+
+                    members.add(member);
+                }
+            }
+
+            return members;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String findCollectivityIdByMemberId(String memberId) {
+
+        String sql = """
+            SELECT collectivity_id
+            FROM member_collectivity
+            WHERE member_id = ?
+        """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setString(1, memberId);
+            String collectivity_id = null;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    collectivity_id = rs.getString("collectivity_id");
+                }
+            }
+            return collectivity_id;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
