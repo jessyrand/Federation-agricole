@@ -2,19 +2,18 @@ package school.hei.federationagricoleapi.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import school.hei.federationagricoleapi.entity.ENUM.AccountType;
 import school.hei.federationagricoleapi.entity.Collectivity;
+import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.ENUM.Type_enum;
 import school.hei.federationagricoleapi.entity.Member;
-import school.hei.federationagricoleapi.exception.NotFoundException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -50,7 +49,7 @@ public class CollectivityRepository {
                 """;
         
         try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setObject(1, UUID.fromString(id));
+            pstm.setString(1, id);
             try (ResultSet rs = pstm.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(saveCollectivityInfo(rs));
@@ -74,10 +73,10 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             for (CreateCollectivityDTO collectivity : collectivities) {
                 pstmt.setString(1, collectivity.getLocation());
-                pstmt.setObject(2, UUID.fromString(collectivity.getStructure().getPresident()));
-                pstmt.setObject(3, UUID.fromString(collectivity.getStructure().getVicePresident()));
-                pstmt.setObject(4, UUID.fromString(collectivity.getStructure().getTreasurer()));
-                pstmt.setObject(5, UUID.fromString(collectivity.getStructure().getSecretary()));
+                pstmt.setString(2, collectivity.getStructure().getPresident());
+                pstmt.setString(3, collectivity.getStructure().getVicePresident());
+                pstmt.setString(4, collectivity.getStructure().getTreasurer());
+                pstmt.setString(5, collectivity.getStructure().getSecretary());
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -106,8 +105,8 @@ public class CollectivityRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 for (String id : collectivity.getMembers()) {
-                    pstmt.setObject(1, UUID.fromString(id));
-                    pstmt.setObject(2, UUID.fromString(idCollectivity));
+                    pstmt.setString(1, id);
+                    pstmt.setString(2, idCollectivity);
 
                     pstmt.executeUpdate();
                     memberRepository.findById(id).ifPresent(members::add);
@@ -141,7 +140,7 @@ public class CollectivityRepository {
             """;
         List<Member> members = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setObject(1, UUID.fromString(collectivityId));
+            pstmt.setString( 1, collectivityId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     memberRepository.findById(rs.getString("member_id")).ifPresent(members::add);
@@ -179,7 +178,7 @@ public class CollectivityRepository {
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, number);
             pstmt.setString(2, name);
-            pstmt.setObject(3, java.util.UUID.fromString(id));
+            pstmt.setString(3, id);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -193,5 +192,65 @@ public class CollectivityRepository {
         catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Repository
+    @AllArgsConstructor
+    public static class TransactionRepository {
+        private AccountRepository accountRepository;
+        private Connection connection;
+       private MemberRepository memberRepository;
+
+       public List<CollectivityTransaction> findByCollectivityIdAndDateBetween (
+               String collectivityId, Instant from, Instant to) {
+           String sql = """
+                   select ct.id, ct.collectivity_id, ct.member_id, ct.type,
+                       ct.amount, ct.payment_mode, ct.account_credited_id, ct.creation_date
+                   from collectivity_transaction ct
+                   where ct.collectivity_id = ?
+                       and ct.creation_date >= ?
+                       and ct.creation_date <= ?
+                   order by ct.creation_date desc
+                   """;
+           List<CollectivityTransaction> transactions = new ArrayList<>();
+
+           try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                pstmt.setString(1, collectivityId);
+                pstmt.setTimestamp(2, Timestamp.from(from));
+                pstmt.setTimestamp(3, Timestamp.from(to));
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        transactions.add(mapRow(rs));
+                    }
+                }
+                return transactions;
+           }
+           catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+       }
+
+       private CollectivityTransaction mapRow(ResultSet rs) throws SQLException {
+           CollectivityTransaction ct = new CollectivityTransaction();
+
+           ct.setId(rs.getString("id"));
+           ct.setCollectivityId(rs.getString("collectivity_id"));
+           ct.setType(Type_enum.valueOf(rs.getString("type")));
+           ct.setPaymentMode(AccountType.valueOf(rs.getString("payment_mode")));
+
+           Timestamp creationDate = rs.getTimestamp("creation_date");
+           ct.setCreationDate(creationDate != null ? creationDate.toInstant() : Instant.now());
+
+           String memberId = rs.getString("member_id");
+           ct.setMemberDebited(memberRepository.findById(memberId).orElse(null));
+
+           String accountCreditedId = rs.getString("account_credited_id");
+           if (accountCreditedId != null) {
+               ct.setAcountCredited(accountRepository.findAccountById(accountCreditedId));
+           }
+
+           return ct;
+       }
     }
 }

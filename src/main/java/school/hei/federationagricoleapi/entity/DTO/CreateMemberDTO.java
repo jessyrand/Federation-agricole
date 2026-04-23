@@ -3,8 +3,8 @@ package school.hei.federationagricoleapi.entity.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import school.hei.federationagricoleapi.entity.Gender;
-import school.hei.federationagricoleapi.entity.MemberOccupation;
+import school.hei.federationagricoleapi.entity.ENUM.Gender;
+import school.hei.federationagricoleapi.entity.ENUM.MemberOccupation;
 
 import java.time.LocalDate;
 import java.util.List;

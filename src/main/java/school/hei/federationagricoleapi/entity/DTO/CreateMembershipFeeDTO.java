@@ -4,7 +4,7 @@ package school.hei.federationagricoleapi.entity.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import school.hei.federationagricoleapi.entity.Frequency;
+import school.hei.federationagricoleapi.entity.ENUM.Frequency;
 
 import java.time.LocalDate;
 

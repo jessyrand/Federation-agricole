@@ -1,10 +1,10 @@
 package school.hei.federationagricoleapi.service;
 
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import school.hei.federationagricoleapi.entity.DTO.CreateMembershipFeeDTO;
 import school.hei.federationagricoleapi.entity.MembershipFee;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.MembershipFeeRepository;
