@@ -149,4 +149,55 @@ public class MemberRepository {
             }
         }
     }
+
+    public List<Member> findByCollectivityId(String collectivityId) {
+
+        String sql = """
+            SELECT
+                m.id,
+                m.first_name,
+                m.last_name,
+                m.birth_date,
+                m.gender,
+                m.address,
+                m.profession,
+                m.phone_number,
+                m.email,
+                m.occupation
+            FROM members m
+            JOIN member_collectivity mc ON m.id = mc.member_id
+            WHERE mc.collectivity_id = ?
+        """;
+
+        List<Member> members = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setObject(1, UUID.fromString(collectivityId));
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Member member = new Member();
+
+                    member.setId(rs.getString("id"));
+                    member.setFirstName(rs.getString("first_name"));
+                    member.setLastName(rs.getString("last_name"));
+                    member.setBirthDate(rs.getDate("birth_date").toLocalDate());
+                    member.setGender(Gender.valueOf(rs.getString("gender")));
+                    member.setAddress(rs.getString("address"));
+                    member.setProfession(rs.getString("profession"));
+                    member.setPhoneNumber(rs.getString("phone_number"));
+                    member.setEmail(rs.getString("email"));
+                    member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+
+                    members.add(member);
+                }
+            }
+
+            return members;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

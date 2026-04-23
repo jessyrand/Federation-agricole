@@ -146,4 +146,19 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/collectivities/{id}")
+    public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
+        try {
+            Collectivity collectivity = collectivityServices.getById(id);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(collectivity);
+        }
+        catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
 }
