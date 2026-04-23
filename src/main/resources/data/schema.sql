@@ -86,6 +86,8 @@ create table if not exists collectivity_transaction (
 
 create table if not exists account (
     id uuid primary key default gen_random_uuid(),
+    collectivity_id uuid references collectivities(id),
+    member_id uuid references members(id),
     amount numeric(10,2) not null default 0,
     type account_type_enum not null
 );

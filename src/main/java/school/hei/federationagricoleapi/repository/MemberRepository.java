@@ -2,9 +2,9 @@ package school.hei.federationagricoleapi.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import school.hei.federationagricoleapi.entity.Gender;
+import school.hei.federationagricoleapi.entity.ENUM.Gender;
 import school.hei.federationagricoleapi.entity.Member;
-import school.hei.federationagricoleapi.entity.MemberOccupation;
+import school.hei.federationagricoleapi.entity.ENUM.MemberOccupation;
 
 import java.sql.*;
 import java.time.Instant;

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import school.hei.federationagricoleapi.entity.ENUM.BankName;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

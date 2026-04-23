@@ -2,8 +2,7 @@ package school.hei.federationagricoleapi.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import school.hei.federationagricoleapi.controller.AccountRepository;
-import school.hei.federationagricoleapi.entity.AccountType;
+import school.hei.federationagricoleapi.entity.ENUM.AccountType;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
@@ -237,8 +236,10 @@ public class CollectivityRepository {
 
            ct.setId(rs.getString("id"));
            ct.setCollectivityId(rs.getString("collectivity_id"));
-           ct.setCreationDate(Instant.from(rs.getTimestamp("creation_date").toLocalDateTime()));
            ct.setPaymentMode(AccountType.valueOf(rs.getString("payment_mode")));
+
+           Timestamp creationDate = rs.getTimestamp("creation_date");
+           ct.setCreationDate(creationDate != null ? creationDate.toInstant() : Instant.now());
 
            String memberId = rs.getString("member_id");
            ct.setMemberDebited(memberRepository.findById(memberId).orElse(null));

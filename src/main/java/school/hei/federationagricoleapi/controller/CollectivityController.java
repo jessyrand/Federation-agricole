@@ -129,7 +129,7 @@ public class CollectivityController {
             List<CollectivityTransaction> transactions = collectivityServices.getTransactions(id, from, to);
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body("test");
+                    .body(transactions);
         }
         catch (BadRequestException e) {
             return ResponseEntity

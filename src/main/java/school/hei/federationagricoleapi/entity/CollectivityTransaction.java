@@ -3,8 +3,8 @@ package school.hei.federationagricoleapi.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.hei.federationagricoleapi.entity.ENUM.AccountType;
 
-import java.sql.Date;
 import java.time.Instant;
 
 @Data
