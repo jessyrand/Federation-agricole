@@ -3,6 +3,8 @@ package school.hei.federationagricoleapi.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.hei.federationagricoleapi.entity.ENUM.Gender;
+import school.hei.federationagricoleapi.entity.ENUM.MemberOccupation;
 
 import java.time.Instant;
 import java.time.LocalDate;
