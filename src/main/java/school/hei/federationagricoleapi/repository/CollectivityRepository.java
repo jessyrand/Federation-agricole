@@ -6,6 +6,7 @@ import school.hei.federationagricoleapi.entity.ENUM.AccountType;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
+import school.hei.federationagricoleapi.entity.ENUM.Type_enum;
 import school.hei.federationagricoleapi.entity.Member;
 
 import java.sql.*;
@@ -204,7 +205,7 @@ public class CollectivityRepository {
        public List<CollectivityTransaction> findByCollectivityIdAndDateBetween (
                String collectivityId, Instant from, Instant to) {
            String sql = """
-                   select ct.id, ct.collectivity_id, ct.member_id,
+                   select ct.id, ct.collectivity_id, ct.member_id, ct.type,
                        ct.amount, ct.payment_mode, ct.account_credited_id, ct.creation_date
                    from collectivity_transaction ct
                    where ct.collectivity_id = ?
@@ -236,6 +237,7 @@ public class CollectivityRepository {
 
            ct.setId(rs.getString("id"));
            ct.setCollectivityId(rs.getString("collectivity_id"));
+           ct.setType(Type_enum.valueOf(rs.getString("type")));
            ct.setPaymentMode(AccountType.valueOf(rs.getString("payment_mode")));
 
            Timestamp creationDate = rs.getTimestamp("creation_date");

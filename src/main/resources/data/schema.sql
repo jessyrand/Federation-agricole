@@ -72,6 +72,8 @@ create table if not exists member_payment (
     creation_date timestamp default now()
 );
 
+create type type_enum as enum ('CREDIT', 'DEBIT');
+
 create table if not exists collectivity_transaction (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     collectivity_id uuid not null
@@ -81,13 +83,13 @@ create table if not exists collectivity_transaction (
     amount numeric(10,2) not null,
     payment_mode account_type_enum not null,
     account_credited_id uuid,
-    creation_date timestamp default now()
+    creation_date timestamp default now(),
+    type type_enum
 );
 
 create table if not exists account (
     id uuid primary key default gen_random_uuid(),
     collectivity_id uuid references collectivities(id),
-    member_id uuid references members(id),
     amount numeric(10,2) not null default 0,
     type account_type_enum not null
 );
