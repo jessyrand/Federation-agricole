@@ -10,7 +10,7 @@ import school.hei.federationagricoleapi.entity.MembershipFee;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class MembershipFeeRepository {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
-            pstmt.setObject(1, UUID.fromString(collectivityId));
+            pstmt.setString(1, collectivityId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
 
@@ -79,7 +79,7 @@ public class MembershipFeeRepository {
 
             for (CreateMembershipFeeDTO dto : dtos) {
 
-                pstmt.setObject(1, UUID.fromString(collectivityId));
+                pstmt.setString(1, collectivityId);
                 pstmt.setDate(2, Date.valueOf(dto.getEligibleFrom()));
                 pstmt.setString(3, dto.getFrequency().name());
                 pstmt.setDouble(4, dto.getAmount());
@@ -101,6 +101,57 @@ public class MembershipFeeRepository {
             }
 
             return fees;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<MembershipFee> findById(String id) {
+
+        String sql = """
+        SELECT 
+            id,
+            eligible_from,
+            frequency,
+            amount,
+            label,
+            status
+        FROM membership_fee
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setString(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                if (rs.next()) {
+
+                    MembershipFee fee = new MembershipFee();
+
+                    fee.setId(rs.getString("id"));
+                    fee.setEligibleFrom(
+                            rs.getDate("eligible_from").toLocalDate()
+                    );
+                    fee.setFrequency(
+                            Frequency.valueOf(rs.getString("frequency"))
+                    );
+
+                    double amount = rs.getDouble("amount");
+                    fee.setAmount(rs.wasNull() ? null : amount);
+
+                    fee.setLabel(rs.getString("label"));
+                    fee.setStatus(
+                            ActivityStatus.valueOf(rs.getString("status"))
+                    );
+
+                    return Optional.of(fee);
+                }
+            }
+
+            return Optional.empty();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
