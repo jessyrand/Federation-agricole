@@ -95,7 +95,7 @@ create type mobil_service_enum as enum ('AIRTEL_MONEY' , 'MVOLA', 'ORANGE_MONEY'
 create table if not exists mobil_account (
     id uuid primary key references account(id) on delete cascade,
     holder_name varchar(255) not null,
-    mobil_bamk_service mobil_service_enum not null,
+    mobil_bank_service mobil_service_enum not null,
     number varchar(10) not null
 );
 

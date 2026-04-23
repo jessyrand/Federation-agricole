@@ -2,15 +2,15 @@ package school.hei.federationagricoleapi.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import school.hei.federationagricoleapi.controller.AccountRepository;
+import school.hei.federationagricoleapi.entity.AccountType;
 import school.hei.federationagricoleapi.entity.Collectivity;
+import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
 import school.hei.federationagricoleapi.entity.Member;
-import school.hei.federationagricoleapi.exception.NotFoundException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -193,5 +193,62 @@ public class CollectivityRepository {
         catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Repository
+    @AllArgsConstructor
+    public static class TransactionRepository {
+        private AccountRepository accountRepository;
+        private Connection connection;
+       private MemberRepository memberRepository;
+
+       public List<CollectivityTransaction> findByCollectivityIdAndDateBetween (
+               String collectivityId, Instant from, Instant to) {
+           String sql = """
+                   select ct.id, ct.collectivity_id, ct.member_id,
+                       ct.amount, ct.payment_mode, ct.account_credited_id, ct.creation_date
+                   from collectivity_transaction ct
+                   where ct.collectivity_id = ?
+                       and ct.creation_date >= ?
+                       and ct.creation_date <= ?
+                   order by ct.creation_date desc
+                   """;
+           List<CollectivityTransaction> transactions = new ArrayList<>();
+
+           try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                pstmt.setObject(1, UUID.fromString(collectivityId));
+                pstmt.setTimestamp(2, Timestamp.from(from));
+                pstmt.setTimestamp(3, Timestamp.from(to));
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        transactions.add(mapRow(rs));
+                    }
+                }
+                return transactions;
+           }
+           catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+       }
+
+       private CollectivityTransaction mapRow(ResultSet rs) throws SQLException {
+           CollectivityTransaction ct = new CollectivityTransaction();
+
+           ct.setId(rs.getString("id"));
+           ct.setCollectivityId(rs.getString("collectivity_id"));
+           ct.setCreationDate(Instant.from(rs.getTimestamp("creation_date").toLocalDateTime()));
+           ct.setPaymentMode(AccountType.valueOf(rs.getString("payment_mode")));
+
+           String memberId = rs.getString("member_id");
+           ct.setMemberDebited(memberRepository.findById(memberId).orElse(null));
+
+           String accountCreditedId = rs.getString("account_credited_id");
+           if (accountCreditedId != null) {
+               ct.setAcountCredited(accountRepository.findAccountById(accountCreditedId));
+           }
+
+           return ct;
+       }
     }
 }

@@ -1,4 +1,4 @@
-package school.hei.federationagricoleapi.entity;
+package school.hei.federationagricoleapi.entity.ENUM;
 
 public enum ActivityStatus {
     ACTIVE,

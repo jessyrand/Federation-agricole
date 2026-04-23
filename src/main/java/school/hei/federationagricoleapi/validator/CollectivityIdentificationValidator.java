@@ -2,14 +2,13 @@ package school.hei.federationagricoleapi.validator;
 
 import org.springframework.stereotype.Component;
 import school.hei.federationagricoleapi.entity.Collectivity;
-import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 
 @Component
 public class CollectivityIdentificationValidator {
-    private CollectivityRepository collectivityRepository;
+    private final CollectivityRepository collectivityRepository;
 
     public CollectivityIdentificationValidator(CollectivityRepository collectivityRepository) {
         this.collectivityRepository = collectivityRepository;

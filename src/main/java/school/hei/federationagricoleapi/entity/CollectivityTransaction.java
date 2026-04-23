@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.time.Instant;
 
 @Data
@@ -14,6 +15,6 @@ public class CollectivityTransaction {
     private String collectivityId;
     private Instant creationDate;
     private AccountType paymentMode;
-    private AcountCredited acountCredited;
+    private Account acountCredited;
     private Member memberDebited;
 }
