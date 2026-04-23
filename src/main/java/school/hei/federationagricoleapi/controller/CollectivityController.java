@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import school.hei.federationagricoleapi.entity.Account;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
@@ -155,9 +156,33 @@ public class CollectivityController {
                     .status(HttpStatus.OK)
                     .body(collectivity);
         }
+           catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+          
+    @GetMapping("/collectivities/{id}/financialAccounts")
+    public ResponseEntity<?> getFinancialAccounts(
+            @PathVariable String id,
+            @RequestParam (required = false) String at) {
+        try {
+            Instant atInstant = (at == null || at.isBlank() )? null : Instant.parse(at);
+
+            List<Account> accounts = collectivityServices.getFinancialAccount(id, atInstant);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(accounts);
+        }
         catch (NotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+        catch (BadRequestException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         }
     }

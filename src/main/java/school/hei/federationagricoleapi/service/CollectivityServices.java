@@ -2,6 +2,7 @@ package school.hei.federationagricoleapi.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.hei.federationagricoleapi.entity.Account;
 import school.hei.federationagricoleapi.entity.Collectivity;
 import school.hei.federationagricoleapi.entity.CollectivityTransaction;
 import school.hei.federationagricoleapi.entity.DTO.CollectivityIdentificationDTO;
@@ -9,6 +10,7 @@ import school.hei.federationagricoleapi.entity.DTO.CreateCollectivityDTO;
 import school.hei.federationagricoleapi.entity.Member;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
+import school.hei.federationagricoleapi.repository.AccountRepository;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.MemberRepository;
 import school.hei.federationagricoleapi.validator.CollectivityIdentificationValidator;
@@ -19,6 +21,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class CollectivityServices {
+    private AccountRepository accountRepository;
     private CollectivityRepository collectivityRepository;
     private MemberRepository memberRepository;
     private CollectivityRepository.TransactionRepository transactionRepository;
@@ -44,7 +47,6 @@ public class CollectivityServices {
 
         Collectivity collectivity = collectivityRepository.findById(id).orElse(null);
         collectivityIdentificationValidator.validateIdentification(collectivity);
-
 
         collectivity.setNumber(dto.getNumber());
         collectivity.setName(dto.getName());
@@ -78,7 +80,15 @@ public class CollectivityServices {
         List<Member> members = memberRepository.findByCollectivityId(id);
 
         collectivity.setMembers(members);
+      return collectivity;
+      
+    }
 
         return collectivity;
+    public List<Account> getFinancialAccount (String collectivityId, Instant at) {
+        collectivityRepository.findById(collectivityId)
+                .orElseThrow(() -> new NotFoundException("Collectivity not found"));
+
+        return accountRepository.findByCollectivityIdAt(collectivityId, at);
     }
 }
