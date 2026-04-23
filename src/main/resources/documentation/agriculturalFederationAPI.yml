@@ -146,6 +146,43 @@ paths:
           description: Provided query parameters occur some exceptions.
         404:
           description: Collectivity not found.
+  '/collectivities/{id}/financialAccounts':
+    get:
+      summary: Get financial accounts of a collectivity at a given date
+      description: |
+        Returns the list of financial accounts of a collectivity (cash, mobile money, or bank)
+        with their balance calculated at the given date.
+        If `at` is not provided, the current date and time is used by default.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The collectivity ID
+        - in: query
+          name: at
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: '2026-01-01T00:00:00Z'
+          description: |
+            The date at which to calculate the balance of each account.
+            Defaults to now if not provided. Must be ISO-8601 format.
+      responses:
+        200:
+          description: List of financial accounts with their balance at the given date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FinancialAccount'
+        400:
+          description: Invalid date format or invalid UUID.
+        404:
+          description: Collectivity not found.
   '/members':
     post:
       summary: Create list of members
@@ -355,7 +392,6 @@ components:
         creationDate:
           type: string
           format: date
-
     FinancialAccount:
       oneOf:
         - $ref: '#/components/schemas/CashAccount'
