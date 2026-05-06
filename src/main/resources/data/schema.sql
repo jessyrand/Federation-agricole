@@ -1,116 +1,104 @@
 
-create type gender_enum as enum ('MALE', 'FEMALE');
+CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE');
+CREATE TYPE occupation_type AS ENUM ('JUNIOR', 'SENIOR', 'SECRETARY', 'TREASURER', 'VICE_PRESIDENT', 'PRESIDENT');
+CREATE TYPE account_type_enum AS ENUM ('CASH', 'BANK', 'MOBILE_MONEY');
+CREATE TYPE membership_frequency AS ENUM ('WEEKLY', 'MONTHLY', 'ANNUALLY', 'PUNCTUALLY');
+CREATE TYPE payment_method_enum AS ENUM ('CASH', 'MOBILE_MONEY', 'BANK_TRANSFER');
+CREATE TYPE attendance_status_enum AS ENUM ('MISSING', 'ATTENDED', 'UNDEFINED');
+CREATE TYPE bank_name_enum AS ENUM ( 'BRED', 'MCB', 'BMOI', 'BOA', 'BGFI', 'AFG', 'ACCES_BAQUE', 'BAOBAB', 'SIPEM' );
+CREATE TYPE mobile_banking_service_enum as ENUM ('AIRTEL_MONEY', 'MVOLA' ,'ORANGE_MONEY');
 
-create type member_occupation_enum as enum ('JUNIOR', 'SENIOR', 'SECRETARY', 'TREASURER', 'VICE_PRESIDENT', 'PRESIDENT');
-
-create table if not exists members (
-     id varchar(50) primary key,
-     first_name varchar(50) not null,
-     last_name varchar(50) not null,
-     birth_date date not null ,
-     gender gender_enum not null ,
-     address varchar(255)not null,
-     profession varchar(255)not null,
-     phone_number varchar(10)not null,
-     email varchar(255)not null,
-     occupation member_occupation_enum not null,
-     created_at timestamp without time zone default now()
+CREATE TABLE collectivities (
+    id VARCHAR(50) PRIMARY KEY,
+    number INTEGER UNIQUE NOT NULL,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    agricultural_specialty VARCHAR(100) NOT NULL
 );
 
-create table if not exists collectivities (
-    id varchar(50) primary key,
-    location varchar(255) not null,
-    president_id uuid references members(id),
-    vice_president_id uuid references  members(id),
-    treasurer_id uuid references members(id),
-    secretary_id uuid references members(id)
+CREATE TABLE members (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) NOT NULL REFERENCES collectivities(id),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender gender_type NOT NULL,
+    address TEXT NOT NULL,
+    profession VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    membership_date DATE NOT NULL,
+    occupation occupation_type NOT NULL,
+    registration_fee_paid BOOLEAN DEFAULT FALSE,
+    membership_dues_paid BOOLEAN DEFAULT FALSE
 );
 
-create table if not exists member_collectivity (
-    member_id varchar(50) not null references members(id),
-    collectivity_id varchar(50) not null references collectivities(id)
+CREATE TABLE member_referees (
+    member_id VARCHAR(50) REFERENCES members(id),
+    referee_id VARCHAR(50) REFERENCES members(id),
+    relationship VARCHAR(50),
+    PRIMARY KEY (member_id, referee_id)
 );
 
-create table if not exists member_referees (
-    member_id varchar(50) references members(id) on delete cascade,
-    referee_id varchar(50) references members(id) on delete cascade,
-    primary key (member_id, referee_id)
+CREATE TABLE accounts (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) NOT NULL REFERENCES collectivities(id),
+    account_type account_type_enum NOT NULL,
+    holder_name VARCHAR(100),
+    bank_name bank_name_enum,
+    bank_code INTEGER,
+    bank_branch_code INTEGER,
+    bank_account_number INTEGER,
+    bank_account_key INTEGER,
+    mobile_banking_service mobile_banking_service_enum,
+    mobile_number VARCHAR(20),
+    balance DECIMAL(15, 2) DEFAULT 0.00,
+    currency VARCHAR(3) DEFAULT 'MGA'
 );
 
-ALTER TABLE collectivities
-    ADD COLUMN number VARCHAR UNIQUE,
-    ADD COLUMN name VARCHAR UNIQUE;
-
-create type frequency_enum as enum ('WEEKLY', 'MONTHLY', 'ANNUALY', 'PUNCTUALLY');
-
-create type status_enum as enum ('ACTIVE', 'INACTIVE');
-
-create table if not exists membership_fee (
-    id varchar(50) PRIMARY KEY,
-    collectivity_id varchar(50) NOT NULL,
-    eligible_from DATE NOT NULL,
-    frequency frequency_enum NOT NULL,
-    amount numeric(10,2) NOT NULL,
-    label VARCHAR,
-    status status_enum NOT NULL DEFAULT 'ACTIVE',
-    CONSTRAINT fk_collectivity_fee
-        FOREIGN KEY (collectivity_id)
-            REFERENCES collectivities(id) ON DELETE CASCADE
+CREATE TABLE membership_fees (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) NOT NULL REFERENCES collectivities(id),
+    label VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    frequency membership_frequency NOT NULL,
+    eligible_since DATE NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL
 );
 
-create type account_type_enum as enum ('CASH', 'MOBILE_BANKING', 'BANK_TRANSFER');
-
-create table if not exists member_payment (
-    id varchar(50) primary key,
-    member_id varchar(50) not null
-        references members(id) on delete cascade,
-    membership_fee_id varchar(50) not null
-        references membership_fee(id) on delete cascade,
-    amount numeric(10,2) not null,
-    payment_mode account_type_enum not null,
-    account_credited_id varchar(50),
-    creation_date timestamp default now()
+CREATE TABLE payments (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) NOT NULL REFERENCES collectivities(id),
+    member_id VARCHAR(50) NOT NULL REFERENCES members(id),
+    account_id VARCHAR(50) NOT NULL REFERENCES accounts(id),
+    amount DECIMAL(15, 2) NOT NULL,
+    payment_method payment_method_enum NOT NULL,
+    payment_date DATE NOT NULL DEFAULT CURRENT_DATE
 );
 
-create type type_enum as enum ('CREDIT', 'DEBIT');
-
-create table if not exists collectivity_transaction (
-    id varchar(50) PRIMARY KEY,
-    collectivity_id varchar(50) not null
-        references collectivities(id) on delete cascade,
-    member_id varchar(50) not null
-        references members(id) on delete cascade,
-    amount numeric(10,2) not null,
-    payment_mode account_type_enum not null,
-    account_credited_id varchar(50),
-    creation_date timestamp default now(),
-    type type_enum
+CREATE TABLE transactions (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) NOT NULL REFERENCES collectivities(id),
+    debited_member_id VARCHAR(50) REFERENCES members(id),
+    credited_account_id VARCHAR(50) NOT NULL REFERENCES accounts(id),
+    amount DECIMAL(15, 2) NOT NULL,
+    payment_method payment_method_enum NOT NULL,
+    created_at DATE DEFAULT CURRENT_DATE
 );
 
-create table if not exists account (
-    id varchar(50) primary key,
-    collectivity_id uuid references collectivities(id),
-    amount numeric(10,2) not null default 0,
-    type account_type_enum not null
+CREATE TABLE activities (
+    id VARCHAR(50) PRIMARY KEY,
+    collectivity_id VARCHAR(50) REFERENCES collectivities(id),
+    activity_type VARCHAR(50) NOT NULL,
+    activity_date DATE NOT NULL,
+    is_mandatory BOOLEAN DEFAULT FALSE
 );
 
-create type mobil_service_enum as enum ('AIRTEL_MONEY' , 'MVOLA', 'ORANGE_MONEY');
-
-create table if not exists mobil_account (
-    id varchar(50) primary key references account(id) on delete cascade,
-    holder_name varchar(255) not null,
-    mobil_bank_service mobil_service_enum not null,
-    number varchar(10) not null
+CREATE TABLE attendance (
+    id VARCHAR(50) PRIMARY KEY,
+    member_id VARCHAR(50) NOT NULL REFERENCES members(id),
+    activity_id VARCHAR(50) NOT NULL REFERENCES activities(id),
+    is_excused BOOLEAN DEFAULT FALSE,
+    status attendance_status_enum NOT NULL DEFAULT 'UNDEFINED',
+    absence_reason TEXT
 );
-
-create type bank_name_enum as enum ('BRED', 'MCB', 'BMOI', 'BOA', 'BGFI', 'AFG', 'ACCES_BAQUE', 'BAOBAB', 'SIPEM');
-
-create table if not exists bank_account (
-    id varchar(50) primary key references account(id) on delete cascade,
-    holder_name varchar(255) not null,
-    bank_name bank_name_enum not null,
-    bank_code varchar(5) not null,
-    bank_branchCode varchar(5) not null,
-    bank_account_number varchar(11) not null,
-    bank_account_key varchar(2) not null
-)

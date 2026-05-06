@@ -3,7 +3,7 @@ create database agricultural_federation_db;
 
 create user agricultural_federation_db_manager with password '123456';
 
-grant connect on database agricultural_federation to agricultural_federation_db_manager;
+grant connect on database agricultural_federation_db to agricultural_federation_db_manager;
 
 \c agricultural_federation_db
 
