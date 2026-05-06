@@ -13,7 +13,7 @@ CREATE TABLE collectivities (
     number INTEGER UNIQUE NOT NULL,
     name VARCHAR(100) UNIQUE NOT NULL,
     location VARCHAR(100) NOT NULL,
-    agricultural_specialty VARCHAR(100) NOT NULL
+    specialization VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE members (
