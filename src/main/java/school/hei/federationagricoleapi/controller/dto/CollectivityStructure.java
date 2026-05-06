@@ -1,14 +1,16 @@
-package school.hei.federationagricoleapi.entity;
+package school.hei.federationagricoleapi.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Getter
+@EqualsAndHashCode
 public class CollectivityStructure {
     private Member president;
     private Member vicePresident;

@@ -1,14 +1,18 @@
-package school.hei.federationagricoleapi.entity;
+package school.hei.federationagricoleapi.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class MemberInformation {
     private String firstName;
     private String lastName;
