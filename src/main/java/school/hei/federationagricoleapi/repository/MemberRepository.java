@@ -26,7 +26,7 @@ public class MemberRepository {
         List<Member> memberList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 """
-                        insert into "member" (id,
+                        insert into "member" (id, 
                                               first_name,
                                               last_name,
                                               birth_date,
@@ -37,8 +37,8 @@ public class MemberRepository {
                                               email,
                                               occupation,
                                               registration_fee_paid,
-                                              membership_dues_paid)
-                        values (?, ?, ?, ?, ?::gender, ?, ?, ?, ?, ?::member_occupation, ?, ?)
+                                              membership_dues_paid) 
+                        values (?, ?, ?, ?, ?::gender, ?, ?, ?, ?, ?::member_occupation, ?, ?) 
                         on conflict (id) do update set first_name = excluded.first_name,
                                                        last_name = excluded.last_name,
                                                        birth_date = excluded.birth_date,

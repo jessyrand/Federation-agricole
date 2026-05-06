@@ -112,7 +112,7 @@ public class CollectivityRepository {
     public List<Collectivity> findAllByMemberId(String memberId) {
         List<Collectivity> collectivities = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement("""
-                select id, name, number, location, president_id, vice_president_id, treasurer_id, secretary_id
+                select collectivity.id, name, number, location, president_id, vice_president_id, treasurer_id, secretary_id
                 from "collectivity" 
                 join "collectivity_member" on collectivity.id = collectivity_member.collectivity_id
                 where collectivity_member.member_id = ?
