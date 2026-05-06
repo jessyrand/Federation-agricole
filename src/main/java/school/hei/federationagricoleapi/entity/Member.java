@@ -1,18 +1,18 @@
 package school.hei.federationagricoleapi.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import school.hei.federationagricoleapi.entity.ENUM.Gender;
-import school.hei.federationagricoleapi.entity.ENUM.MemberOccupation;
+import lombok.*;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
+import static school.hei.federationagricoleapi.entity.MemberOccupation.JUNIOR;
+
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class Member {
     private String id;
     private String firstName;
@@ -24,7 +24,39 @@ public class Member {
     private String phoneNumber;
     private String email;
     private MemberOccupation occupation;
-    private Collectivity collectivity;
     private List<Member> referees;
-    private Instant createdAt;
+    private List<Collectivity> collectivities;
+    private Boolean registrationFeePaid;
+    private Boolean membershipDuesPaid;
+
+    public boolean refereesAreEligible() {
+        if (referees == null || referees.isEmpty()) {
+            return false;
+        }
+        var memberRefereesInsideActualCollectivityNotJuniorCount = referees.stream().filter(member ->
+                        member.getCollectivities() != null
+                        && member.getCollectivities().stream()
+                                .anyMatch(collectivity -> collectivities.contains(collectivity) && !JUNIOR.equals(member.getOccupation())))
+                .count();
+        return memberRefereesInsideActualCollectivityNotJuniorCount >= 2;
+    }
+
+    public List<Collectivity> addCollectivity(Collectivity collectivity) {
+        if (collectivities == null) {
+            collectivities = new ArrayList<>();
+        }
+        collectivities.add(collectivity);
+        return collectivities;
+    }
+
+    public List<Member> addReferees(List<Member> refereeMembers) {
+        if (referees == null) {
+            referees = new ArrayList<>();
+        }
+
+        referees.addAll(refereeMembers);
+
+        return referees;
+    }
+
 }

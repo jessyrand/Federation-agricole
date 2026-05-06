@@ -1,77 +1,33 @@
 package school.hei.federationagricoleapi.service;
 
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-import school.hei.federationagricoleapi.entity.Collectivity;
-import school.hei.federationagricoleapi.entity.DTO.CreateMemberDTO;
 import school.hei.federationagricoleapi.entity.Member;
-import school.hei.federationagricoleapi.exception.NotFoundException;
-import school.hei.federationagricoleapi.repository.CollectivityRepository;
+import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.UUID.randomUUID;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MemberService {
-
     private final MemberRepository memberRepository;
-    private final CollectivityRepository collectivityRepository;
 
-    public List<Member> createMembers(List<CreateMemberDTO> dtos) {
-
-        boolean hasExistingMembers = memberRepository.existsAnyMember();
-
-        List<Member> members = new ArrayList<>();
-
-        for (CreateMemberDTO dto : dtos) {
-            if (Boolean.FALSE.equals(dto.getRegistrationFeePaid()) ||
-                    Boolean.FALSE.equals(dto.getMembershipDuesPaid())) {
-                throw new IllegalArgumentException("Fees not paid");
+    public List<Member> addNewMembers(List<Member> memberList) {
+        for (Member member : memberList) {
+            if (!member.refereesAreEligible()) {
+                throw new BadRequestException("Member.id=" + member.getId() + " member referees are not eligible");
             }
-
-            Collectivity collectivity = collectivityRepository
-                    .findById(dto.getCollectivityIdentifier())
-                    .orElseThrow(() -> new NotFoundException("Collectivity not found"));
-
-            List<Member> referees = new ArrayList<>();
-
-            if (dto.getReferees() != null && !dto.getReferees().isEmpty()) {
-                for (String refereeId : dto.getReferees()) {
-                    Member referee = memberRepository.findById(refereeId)
-                            .orElseThrow(() -> new NotFoundException("Referee not found"));
-                    referees.add(referee);
-                }
+            if (!member.getMembershipDuesPaid()) {
+                throw new BadRequestException("Member.id=" + member.getId() + " membership dues not paid");
             }
-
-            if (hasExistingMembers && referees.isEmpty()) {
-                throw new IllegalArgumentException("Referee required");
+            if (!member.getRegistrationFeePaid()) {
+                throw new BadRequestException("Member.id=" + member.getId() + " membership fees not paid");
             }
-
-            if (!hasExistingMembers && !referees.isEmpty()) {
-                throw new IllegalArgumentException("First member cannot have referees");
-            }
-
-            Member member = new Member();
-            member.setFirstName(dto.getFirstName());
-            member.setLastName(dto.getLastName());
-            member.setBirthDate(dto.getBirthDate());
-            member.setGender(dto.getGender());
-            member.setAddress(dto.getAddress());
-            member.setProfession(dto.getProfession());
-            member.setPhoneNumber(dto.getPhoneNumber());
-            member.setEmail(dto.getEmail());
-            member.setOccupation(dto.getOccupation());
-            member.setCreatedAt(Instant.now());
-
-            member.setCollectivity(collectivity);
-            member.setReferees(referees);
-
-            members.add(member);
+            member.setId(randomUUID().toString());
         }
-
-        return memberRepository.saveAll(members);
+        return memberRepository.saveAll(memberList);
     }
 }
