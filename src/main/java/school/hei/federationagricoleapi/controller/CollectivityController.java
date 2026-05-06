@@ -1,8 +1,13 @@
 package school.hei.federationagricoleapi.controller;
 
+import school.hei.federationagricoleapi.controller.dto.CollectivityInformation;
 import school.hei.federationagricoleapi.controller.dto.CreateCollectivity;
+import school.hei.federationagricoleapi.controller.dto.CreateMembershipFee;
 import school.hei.federationagricoleapi.controller.mapper.CollectivityDtoMapper;
+import school.hei.federationagricoleapi.controller.mapper.FinancialAccountDtoMapper;
+import school.hei.federationagricoleapi.controller.mapper.MembershipFeeDtoMapper;
 import school.hei.federationagricoleapi.entity.Collectivity;
+import school.hei.federationagricoleapi.entity.MembershipFee;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.service.CollectivityService;
@@ -11,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
@@ -19,7 +25,9 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class CollectivityController {
     private final CollectivityDtoMapper collectivityDtoMapper;
+    private final MembershipFeeDtoMapper membershipFeeDtoMapper;
     private final CollectivityService collectivityService;
+    private final FinancialAccountDtoMapper financialAccountDtoMapper;
 
     @GetMapping("/collectivities/{id}")
     public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
@@ -54,6 +62,89 @@ public class CollectivityController {
                     .body(e.getMessage());
         } catch (
                 NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/collectivities/{id}/informations")
+    public ResponseEntity<?> updateCollectivityInformation(@PathVariable String id,
+                                                           @RequestBody CollectivityInformation collectivityInformation) {
+        String name = collectivityInformation.getName();
+        Integer number = collectivityInformation.getNumber();
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityDtoMapper.mapToDto(collectivityService.updateInformations(id, name, number)));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> getCollectivityMembershipFeesByCollectivity(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.getMembershipFeesByCollectivityIdentifier(id).stream()
+                            .map(membershipFeeDtoMapper::mapToDto)
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/collectivities/{id}/membershipFees")
+    public ResponseEntity<?> createCollectivityMembershipFee(
+            @PathVariable String id,
+            @RequestBody List<CreateMembershipFee> membershipFees) {
+        try {
+            List<MembershipFee> membershipFeesToCreate = membershipFees.stream()
+                    .map(membershipFeeDtoMapper::mapToEntity)
+                    .toList();
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.createMembershipFees(id, membershipFeesToCreate).stream()
+                            .map(membershipFeeDtoMapper::mapToDto)
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/collectivities/{id}/financialAccounts")
+    public ResponseEntity<?> getCollectivityFinancialAccounts(@PathVariable String id,
+                                                              @RequestParam(required = false) LocalDate at) {
+        try {
+            return ResponseEntity.status(OK)
+                    .body(collectivityService.getFinancialAccounts(id).stream()
+                            .map(financialAccount -> financialAccountDtoMapper.mapToDto(financialAccount, at))
+                            .toList());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
             return ResponseEntity.status(NOT_FOUND)
                     .body(e.getMessage());
         } catch (Exception e) {
