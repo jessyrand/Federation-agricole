@@ -9,10 +9,12 @@ import school.hei.federationagricoleapi.repository.MembershipFeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static school.hei.federationagricoleapi.entity.ActivityStatus.ACTIVE;
+import static school.hei.federationagricoleapi.entity.PaymentMode.*;
 import static java.util.UUID.randomUUID;
 
 @Service
