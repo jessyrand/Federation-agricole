@@ -15,11 +15,12 @@ import java.util.UUID;
 public class ActivityRepository {
     private final Connection connection;
 
-    public boolean activityExists(String activityId) {
-        String sql = "select 1 from activity a where a.id = ?";
+    public boolean activityExists(String activityId, String id) {
+        String sql = "select 1 from activity a join collectivity c on c.id = a.collectivity_id where a.id = ? and  c.id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
            preparedStatement.setString(1, activityId);
+           preparedStatement.setString(2, id);
            try(ResultSet resultSet = preparedStatement.executeQuery()){
                return resultSet.next();
            }

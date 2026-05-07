@@ -26,8 +26,8 @@ public class ActivityService {
         if (collectivityRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
-        if (!activityRepository.activityExists(activityId)) {
-            throw new NotFoundException("Activity with id " + activityId + " not found");
+        if (!activityRepository.activityExists(activityId, id)) {
+            throw new NotFoundException("Activity with id " + activityId + " not found for collectivity with id " + id);
         }
         if (attendanceList.isEmpty()) {
             throw new BadRequestException("Attendance list is empty");
@@ -40,8 +40,8 @@ public class ActivityService {
         if (collectivityRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
-        if (!activityRepository.activityExists(activityId)) {
-            throw new NotFoundException("Activity with id " + activityId + " not found");
+        if (!activityRepository.activityExists(activityId, id)) {
+            throw new NotFoundException("Activity with id " + activityId + " not found for collectivity with id " + id );
         }
         return activityRepository.getAllAttendance(activityId);
     }
