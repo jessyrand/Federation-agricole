@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import school.hei.federationagricoleapi.controller.dto.AttendanceSubmissionDto;
+import school.hei.federationagricoleapi.controller.dto.CreateActivityMemberAttendance;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.controller.dto.CreateCollectivityActivityRequest;
@@ -27,7 +28,7 @@ public class ActivityController {
     public ResponseEntity<?> submitAttendance(
             @PathVariable String id,
             @PathVariable String activityId,
-            @RequestBody List<AttendanceSubmissionDto> attendanceList
+            @RequestBody List<CreateActivityMemberAttendance> attendanceList
     ) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)

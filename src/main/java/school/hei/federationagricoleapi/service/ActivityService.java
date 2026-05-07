@@ -3,6 +3,7 @@ package school.hei.federationagricoleapi.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.hei.federationagricoleapi.controller.dto.AttendanceSubmissionDto;
+import school.hei.federationagricoleapi.controller.dto.CreateActivityMemberAttendance;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.ActivityRepository;
@@ -21,11 +22,11 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final CollectivityRepository collectivityRepository;
 
-    public List<AttendanceSubmissionDto> saveAttendance(String id, String activityId, List<AttendanceSubmissionDto> attendanceList) {
+    public List<AttendanceSubmissionDto> saveAttendance(String id, String activityId, List<CreateActivityMemberAttendance> attendanceList) {
         if (collectivityRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
-        if (!activityRepository.activityExists(id, activityId)) {
+        if (!activityRepository.activityExists(activityId)) {
             throw new NotFoundException("Activity with id " + activityId + " not found");
         }
         if (attendanceList.isEmpty()) {

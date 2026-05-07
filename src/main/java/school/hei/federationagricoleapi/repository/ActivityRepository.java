@@ -2,10 +2,7 @@ package school.hei.federationagricoleapi.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import school.hei.federationagricoleapi.controller.dto.AttendanceStatus;
-import school.hei.federationagricoleapi.controller.dto.AttendanceSubmissionDto;
-import school.hei.federationagricoleapi.controller.dto.MemberDescription;
-import school.hei.federationagricoleapi.controller.dto.MemberOccupation;
+import school.hei.federationagricoleapi.controller.dto.*;
 import school.hei.federationagricoleapi.entity.CollectivityActivity;
 
 import java.sql.*;
@@ -18,15 +15,11 @@ import java.util.UUID;
 public class ActivityRepository {
     private final Connection connection;
 
-    public boolean activityExists(String activityId, String id) {
-        String sql = """
-            select 1 from activity a
-                     join collectivity c on a.collectivity_id = c.id
-                     where a.id = ? and c.id = ?;""";
+    public boolean activityExists(String activityId) {
+        String sql = "select 1 from activity a where a.id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
            preparedStatement.setString(1, activityId);
-           preparedStatement.setString(2, id);
            try(ResultSet resultSet = preparedStatement.executeQuery()){
                return resultSet.next();
            }
@@ -54,7 +47,7 @@ public class ActivityRepository {
         }
     }
 
-    public List<AttendanceSubmissionDto> saveAttendance(String activityId, List<AttendanceSubmissionDto> attendances) {
+    public List<AttendanceSubmissionDto> saveAttendance(String activityId, List<CreateActivityMemberAttendance> attendances) {
         String sql = """
                 insert into activity_member_attendance (id, activity_id, member_id, attendance_status)
                 values (?, ?, ?, ?::attendance_status)
@@ -72,11 +65,11 @@ public class ActivityRepository {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 connection.setAutoCommit(false);
 
-                for (AttendanceSubmissionDto dto : attendances) {
+                for (CreateActivityMemberAttendance dto : attendances) {
                     String attendanceId = UUID.randomUUID().toString();
                     preparedStatement.setString(1, attendanceId);
                     preparedStatement.setString(2, activityId);
-                    preparedStatement.setString(3, dto.getId());
+                    preparedStatement.setString(3, dto.getMemberIdentifier());
                     preparedStatement.setString(4, dto.getAttendanceStatus().name());
                     preparedStatement.addBatch();
                 }
@@ -87,7 +80,7 @@ public class ActivityRepository {
             List<AttendanceSubmissionDto> res = new ArrayList<>();
             try(PreparedStatement preparedStatement = connection.prepareStatement(selectSql)) {
                 String[] memberIds = attendances.stream()
-                        .map(AttendanceSubmissionDto::getId)
+                        .map(CreateActivityMemberAttendance::getMemberIdentifier)
                         .toArray(String[]::new);
                 Array idsArray = connection.createArrayOf("varchar", memberIds);
 
