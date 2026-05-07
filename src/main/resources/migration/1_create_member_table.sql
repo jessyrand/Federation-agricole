@@ -31,3 +31,5 @@ create table if not exists "member"
     registration_fee_paid boolean,
     membership_dues_paid  boolean
 );
+
+alter table "member" add column if not exists registration_date date default current_date;

@@ -1,9 +1,6 @@
 package school.hei.federationagricoleapi.controller;
 
-import school.hei.federationagricoleapi.controller.dto.CollectivityInformation;
-import school.hei.federationagricoleapi.controller.dto.CreateCollectivity;
-import school.hei.federationagricoleapi.controller.dto.CreateMembershipFee;
-import school.hei.federationagricoleapi.controller.dto.MemberStats;
+import school.hei.federationagricoleapi.controller.dto.*;
 import school.hei.federationagricoleapi.controller.mapper.CollectivityDtoMapper;
 import school.hei.federationagricoleapi.controller.mapper.FinancialAccountDtoMapper;
 import school.hei.federationagricoleapi.controller.mapper.MembershipFeeDtoMapper;
@@ -202,5 +199,23 @@ public class CollectivityController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
         }
+    }
+
+    @GetMapping("/collectivities/statistics")
+    public ResponseEntity<?> getCollectivityStatistics(@RequestParam LocalDate from, @RequestParam LocalDate to) {
+        try {
+            List<CollectivityGlobalStatisticsDto> statistics = collectivityService.getGlobalStatistics(from, to);
+
+            if (statistics.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Collectivity statistics not found");
+            }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(statistics);
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+
     }
 }
