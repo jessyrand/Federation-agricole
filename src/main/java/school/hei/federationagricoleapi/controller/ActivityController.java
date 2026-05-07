@@ -36,7 +36,7 @@ public class ActivityController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         } catch (NotFoundException e) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
           }
     }
   

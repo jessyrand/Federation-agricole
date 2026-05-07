@@ -73,7 +73,7 @@ public class ActivityService {
             activities.add(a);
         }
 
-        return repository.saveAll(collectivityId, activities);
+        return activityRepository.saveAll(collectivityId, activities);
     }
 
     private void validate(CreateCollectivityActivityRequest r) {
@@ -105,6 +105,6 @@ public class ActivityService {
             throw new RuntimeException("Collectivity not found");
         }
 
-        return repository.findAllByCollectivityId(collectivityId);
+        return activityRepository.findAllByCollectivityId(collectivityId);
     }
 }

@@ -7,7 +7,6 @@ import school.hei.federationagricoleapi.controller.dto.AttendanceSubmissionDto;
 import school.hei.federationagricoleapi.controller.dto.MemberDescription;
 import school.hei.federationagricoleapi.controller.dto.MemberOccupation;
 import school.hei.federationagricoleapi.entity.CollectivityActivity;
-import school.hei.federationagricoleapi.entity.MemberOccupation;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -288,10 +287,10 @@ public class ActivityRepository {
         if (sqlArray != null) {
             String[] values = (String[]) sqlArray.getArray();
 
-            List<MemberOccupation> occupations = new ArrayList<>();
+            List<school.hei.federationagricoleapi.entity.MemberOccupation> occupations = new ArrayList<>();
 
             for (String v : values) {
-                occupations.add(MemberOccupation.valueOf(v));
+                occupations.add(school.hei.federationagricoleapi.entity.MemberOccupation.valueOf(v));
             }
 
             a.setMemberOccupationConcerned(occupations);
