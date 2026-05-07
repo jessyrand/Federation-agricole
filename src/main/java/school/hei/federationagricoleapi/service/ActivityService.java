@@ -40,6 +40,9 @@ public class ActivityService {
         if (collectivityRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
+        if (!activityRepository.activityExists(activityId)) {
+            throw new NotFoundException("Activity with id " + activityId + " not found");
+        }
         return activityRepository.getAllAttendance(activityId);
     }
 
