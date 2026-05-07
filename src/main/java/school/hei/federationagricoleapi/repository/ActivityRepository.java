@@ -3,7 +3,6 @@ package school.hei.federationagricoleapi.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import school.hei.federationagricoleapi.entity.CollectivityActivity;
-import school.hei.federationagricoleapi.mapper.CollectivityActivityMapper;
 
 import java.sql.*;
 import java.util.List;
@@ -13,16 +12,24 @@ import java.util.List;
 public class ActivityRepository {
 
     private final Connection connection;
-    private final CollectivityActivityMapper mapper;
 
-    public List<CollectivityActivity> saveAll(String collectivityId,
-                                              List<CollectivityActivity> activities) {
+    public List<CollectivityActivity> saveAll(
+            String collectivityId,
+            List<CollectivityActivity> activities
+    ) {
 
         try (PreparedStatement ps = connection.prepareStatement("""
-            INSERT INTO activity
-            (id, collectivity_id, label, activity_type,
-             executive_date, week_ordinal, day_of_week)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO activity (
+                id,
+                collectivity_id,
+                label,
+                activity_type,
+                executive_date,
+                week_ordinal,
+                day_of_week,
+                member_occupation_concerned
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """)) {
 
             for (CollectivityActivity a : activities) {
@@ -44,17 +51,35 @@ public class ActivityRepository {
                     ps.setNull(6, Types.INTEGER);
                 }
 
-                ps.setString(7, a.getDayOfWeek());
+                if (a.getDayOfWeek() != null) {
+                    ps.setString(7, a.getDayOfWeek());
+                } else {
+                    ps.setNull(7, Types.VARCHAR);
+                }
+
+                if (a.getMemberOccupationConcerned() != null) {
+
+                    String[] values = a.getMemberOccupationConcerned()
+                            .stream()
+                            .map(Enum::name)
+                            .toArray(String[]::new);
+
+                    ps.setArray(8,
+                            connection.createArrayOf("member_occupation", values)
+                    );
+
+                } else {
+                    ps.setNull(8, Types.ARRAY);
+                }
 
                 ps.addBatch();
             }
 
             ps.executeBatch();
-
             return activities;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error inserting activities", e);
         }
     }
 }
