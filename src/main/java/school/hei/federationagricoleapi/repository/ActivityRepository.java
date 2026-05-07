@@ -58,7 +58,7 @@ public class ActivityRepository {
         String selectSql = """
                 select m.id, ama.id as attendance_id, m.first_name, m.last_name,m.email, m.occupation, ama.attendance_status
                     from member m
-                join activity_member_attendance ama on m.id = ama.activity_id
+                join activity_member_attendance ama on m.id = ama.member_id
                 where ama.activity_id = ? and m.id = any(?)
                 """;
         try {
@@ -121,7 +121,7 @@ public class ActivityRepository {
         String sql = """
                select m.id, ama.id as attendance_id, m.first_name, m.last_name,m.email, m.occupation, ama.attendance_status
                     from member m
-                join activity_member_attendance ama on m.id = ama.activity_id
+                join activity_member_attendance ama on m.id = ama.member_id
                 where ama.activity_id = ?
                """;
 
