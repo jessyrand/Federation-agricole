@@ -1,6 +1,7 @@
 package school.hei.federationagricoleapi.service;
 
 import school.hei.federationagricoleapi.controller.dto.CollectivityGlobalStatisticsDto;
+import school.hei.federationagricoleapi.controller.dto.MemberStats;
 import school.hei.federationagricoleapi.entity.*;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
@@ -134,6 +135,16 @@ public class CollectivityService {
         return paymentMode;
     }
 
+    public List<MemberStats> getCollectivityStats(String id, LocalDate from, LocalDate to) {
+        if (collectivityRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Collectivity.id= " + id + " not found");
+        }
+
+        if (from.isAfter(to)) {
+            throw new BadRequestException("from is after to");
+        }
+        return collectivityStatsRepository.fetchCollectivityStats(id, from, to);
+    }
 
     public List<CollectivityGlobalStatisticsDto> getGlobalStatistics(LocalDate from, LocalDate to) {
         if (from.isAfter(to)) {

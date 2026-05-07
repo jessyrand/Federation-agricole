@@ -179,15 +179,8 @@ public class CollectivityController {
     @GetMapping("/collectivities/{id}/statistics")
     public ResponseEntity<?> getCollectivityStatistics(@PathVariable String id, @RequestParam LocalDate from, @RequestParam LocalDate to) {
         try {
-            List<MemberStats> stats = collectivityStatsRepository.fetchCollectivityStats(id, from, to);
-
-            if (stats.isEmpty()) {
-                if(collectivityRepository.findById(id).isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body("Collectivity stats not found");
-                }
-            }
-            return ResponseEntity.status(HttpStatus.OK)
+            List<MemberStats> stats = collectivityService.getCollectivityStats(id, from, to);
+            return ResponseEntity.status(OK)
                     .body(stats);
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST)
