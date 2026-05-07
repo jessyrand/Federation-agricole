@@ -73,4 +73,13 @@ public class ActivityService {
             throw new RuntimeException("memberOccupationConcerned is required");
         }
     }
+
+    public List<CollectivityActivity> getAllByCollectivityId(String collectivityId) {
+
+        if (collectivityRepository.findById(collectivityId).isEmpty()) {
+            throw new RuntimeException("Collectivity not found");
+        }
+
+        return repository.findAllByCollectivityId(collectivityId);
+    }
 }

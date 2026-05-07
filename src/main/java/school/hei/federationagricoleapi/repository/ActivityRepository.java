@@ -3,8 +3,10 @@ package school.hei.federationagricoleapi.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import school.hei.federationagricoleapi.entity.CollectivityActivity;
+import school.hei.federationagricoleapi.entity.MemberOccupation;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -81,5 +83,76 @@ public class ActivityRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error inserting activities", e);
         }
+    }
+
+    public List<CollectivityActivity> findAllByCollectivityId(String collectivityId) {
+
+        List<CollectivityActivity> activities = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement("""
+            SELECT
+                id,
+                collectivity_id,
+                label,
+                activity_type,
+                executive_date,
+                week_ordinal,
+                day_of_week,
+                member_occupation_concerned
+            FROM activity
+            WHERE collectivity_id = ?
+        """)) {
+
+            ps.setString(1, collectivityId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                activities.add(map(rs));
+            }
+
+            return activities;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching activities", e);
+        }
+    }
+
+    private CollectivityActivity map(ResultSet rs) throws SQLException {
+
+        CollectivityActivity a = new CollectivityActivity();
+
+        a.setId(rs.getString("id"));
+        a.setCollectivityId(rs.getString("collectivity_id"));
+        a.setLabel(rs.getString("label"));
+        a.setActivityType(rs.getString("activity_type"));
+
+        Date date = rs.getDate("executive_date");
+        if (date != null) {
+            a.setExecutiveDate(date.toLocalDate());
+        }
+
+        int weekOrdinal = rs.getInt("week_ordinal");
+        if (!rs.wasNull()) {
+            a.setWeekOrdinal(weekOrdinal);
+        }
+
+        a.setDayOfWeek(rs.getString("day_of_week"));
+
+        Array sqlArray = rs.getArray("member_occupation_concerned");
+
+        if (sqlArray != null) {
+            String[] values = (String[]) sqlArray.getArray();
+
+            List<MemberOccupation> occupations = new ArrayList<>();
+
+            for (String v : values) {
+                occupations.add(MemberOccupation.valueOf(v));
+            }
+
+            a.setMemberOccupationConcerned(occupations);
+        }
+
+        return a;
     }
 }
