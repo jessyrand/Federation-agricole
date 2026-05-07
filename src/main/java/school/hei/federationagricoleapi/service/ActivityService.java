@@ -20,7 +20,7 @@ public class ActivityService {
         if (collectivityRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Collectivity with id " + id + " not found");
         }
-        if (!activityRepository.activityExists(activityId)) {
+        if (!activityRepository.activityExists(id, activityId)) {
             throw new NotFoundException("Activity with id " + activityId + " not found");
         }
         if (attendanceList.isEmpty()) {
@@ -28,5 +28,12 @@ public class ActivityService {
         }
 
         return activityRepository.saveAttendance(activityId, attendanceList);
+    }
+
+    public List<AttendanceSubmissionDto> getAttendances(String id, String activityId) {
+        if (collectivityRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Collectivity with id " + id + " not found");
+        }
+        return activityRepository.getAllAttendance(activityId);
     }
 }

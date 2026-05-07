@@ -17,11 +17,15 @@ import java.util.UUID;
 public class ActivityRepository {
     private final Connection connection;
 
-    public boolean activityExists(String activityId) {
-        String sql = "select 1 from activity where id = ?";
+    public boolean activityExists(String activityId, String id) {
+        String sql = """
+            select 1 from activity a
+                     join collectivity c on a.collectivity_id = c.id
+                     where a.id = ? and c.id = ?;""";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
            preparedStatement.setString(1, activityId);
+           preparedStatement.setString(2, id);
            try(ResultSet resultSet = preparedStatement.executeQuery()){
                return resultSet.next();
            }
@@ -115,6 +119,40 @@ public class ActivityRepository {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<AttendanceSubmissionDto> getAllAttendance(String activityId) {
+        String sql = """
+               select m.id, ama.id as attendance_id, m.first_name, m.last_name,m.email, m.occupation, ama.attendance_status
+                    from member m
+                join activity_member_attendance ama on m.id = ama.activity_id
+                where ama.activity_id = ?
+               """;
+
+        List<AttendanceSubmissionDto> res = new ArrayList<>();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, activityId);
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    AttendanceSubmissionDto resDto = new AttendanceSubmissionDto();
+                    resDto.setId(resultSet.getString("attendance_id"));
+                    resDto.setAttendanceStatus(AttendanceStatus.valueOf(resultSet.getString("attendance_status")));
+
+                    MemberDescription member = new MemberDescription();
+                    member.setId(resultSet.getString("id"));
+                    member.setFirstName(resultSet.getString("first_name"));
+                    member.setLastName(resultSet.getString("last_name"));
+                    member.setEmail(resultSet.getString("email"));
+                    member.setOccupation(MemberOccupation.valueOf(resultSet.getString("occupation")));
+
+                    resDto.setMemberDescription(member);
+                    res.add(resDto);
+                }
+                return res;
+            }
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
