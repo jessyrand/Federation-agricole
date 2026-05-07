@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import school.hei.federationagricoleapi.controller.dto.AttendanceSubmissionDto;
+import school.hei.federationagricoleapi.exception.BadRequestException;
+import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.controller.dto.CreateCollectivityActivityRequest;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
@@ -17,10 +20,26 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/collectivities")
 public class ActivityController {
-
     private final ActivityService activityService;
     private final CollectivityActivityMapper collectivityActivityMapper;
 
+    @PostMapping("/{id}/activities/{activityId}/attendance")
+    public ResponseEntity<?> submitAttendance(
+            @PathVariable String id,
+            @PathVariable String activityId,
+            @RequestBody List<AttendanceSubmissionDto> attendanceList
+    ) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(activityService.saveAttendance(id, activityId, attendanceList));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+          }
+    }
+  
     @PostMapping("/{id}/activities")
     public ResponseEntity<?> createActivities(
             @PathVariable String id,
@@ -50,6 +69,23 @@ public class ActivityController {
         }
     }
 
+    @GetMapping("/{id}/activities/{activityId}/attendance")
+    public ResponseEntity<?> getAttendance(
+            @PathVariable String id,
+            @PathVariable String activityId
+    ) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(activityService.getAttendances(id, activityId));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+    
     @GetMapping("/{id}/activities")
     public ResponseEntity<?> getActivities(@PathVariable String id) {
         try {

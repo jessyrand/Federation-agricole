@@ -34,3 +34,6 @@ create index idx_activity_collectivity on activity(collectivity_id);
 create index idx_activity_date on activity(executive_date);
 create index idx_activity_recurrence on activity(week_ordinal, day_of_week);
 create index idx_attendance_member on activity_member_attendance(member_id);
+
+alter table "activity"
+    add column if not exists "member_occupation_concerned" member_occupation[] default '{}';
