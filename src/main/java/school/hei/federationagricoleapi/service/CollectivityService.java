@@ -1,15 +1,19 @@
 package school.hei.federationagricoleapi.service;
 
+import school.hei.federationagricoleapi.controller.dto.CollectivityGlobalStatisticsDto;
+import school.hei.federationagricoleapi.controller.dto.MemberStats;
 import school.hei.federationagricoleapi.entity.*;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
+import school.hei.federationagricoleapi.repository.CollectivityStatsRepository;
 import school.hei.federationagricoleapi.repository.FinancialAccountRepository;
 import school.hei.federationagricoleapi.repository.MembershipFeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -23,6 +27,7 @@ public class CollectivityService {
     private final CollectivityRepository collectivityRepository;
     private final MembershipFeeRepository membershipFeeRepository;
     private final FinancialAccountRepository financialAccountRepository;
+    private final CollectivityStatsRepository collectivityStatsRepository;
 
     public List<Collectivity> createCollectivities(List<Collectivity> collectivities) {
         for (Collectivity collectivity : collectivities) {
@@ -128,5 +133,23 @@ public class CollectivityService {
                     throw new IllegalArgumentException("Unknown financial account type " + financialAccount.getClass().getTypeName());
         };
         return paymentMode;
+    }
+
+    public List<MemberStats> getCollectivityStats(String id, LocalDate from, LocalDate to) {
+        if (collectivityRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Collectivity.id= " + id + " not found");
+        }
+
+        if (from.isAfter(to)) {
+            throw new BadRequestException("from is after to");
+        }
+        return collectivityStatsRepository.fetchCollectivityStats(id, from, to);
+    }
+
+    public List<CollectivityGlobalStatisticsDto> getGlobalStatistics(LocalDate from, LocalDate to) {
+        if (from.isAfter(to)) {
+            throw new BadRequestException("from is after to");
+        }
+        return collectivityStatsRepository.getGlobalStatistics(from, to);
     }
 }
