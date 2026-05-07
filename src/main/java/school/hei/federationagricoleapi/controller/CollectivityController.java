@@ -6,11 +6,13 @@ import school.hei.federationagricoleapi.controller.mapper.FinancialAccountDtoMap
 import school.hei.federationagricoleapi.controller.mapper.MembershipFeeDtoMapper;
 import school.hei.federationagricoleapi.controller.mapper.TransactionDtoMapper;
 import school.hei.federationagricoleapi.entity.Collectivity;
+import school.hei.federationagricoleapi.entity.CollectivityActivity;
 import school.hei.federationagricoleapi.entity.MembershipFee;
 import school.hei.federationagricoleapi.exception.BadRequestException;
 import school.hei.federationagricoleapi.exception.NotFoundException;
 import school.hei.federationagricoleapi.repository.CollectivityRepository;
 import school.hei.federationagricoleapi.repository.CollectivityStatsRepository;
+import school.hei.federationagricoleapi.service.ActivityService;
 import school.hei.federationagricoleapi.service.CollectivityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ public class CollectivityController {
     private final TransactionDtoMapper transactionDtoMapper;
     private final CollectivityStatsRepository collectivityStatsRepository;
     private final CollectivityRepository collectivityRepository;
+    private final ActivityService activityService;
 
     @GetMapping("/collectivities/{id}")
     public ResponseEntity<?> getCollectivityById(@PathVariable String id) {
@@ -209,6 +212,14 @@ public class CollectivityController {
             return ResponseEntity.status(BAD_REQUEST)
                     .body(e.getMessage());
         }
+    }
 
+    @PostMapping("/{id}/activities")
+    public ResponseEntity<List<CollectivityActivity>> create(
+            @PathVariable String id,
+            @RequestBody List<CreateCollectivityActivityRequest> requests
+    ) {
+        return ResponseEntity.status(201)
+                .body(activityService.create(id, requests));
     }
 }
